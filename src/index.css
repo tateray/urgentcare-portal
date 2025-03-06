@@ -1,4 +1,7 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/sf-pro-display');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -91,19 +94,20 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 /* Apple Design Language Inspired Styles */
 @layer components {
   .apple-card {
-    @apply bg-white dark:bg-[#1c1c1e] rounded-xl shadow-sm border border-[#e5e5e5] dark:border-[#2c2c2e];
+    @apply bg-white dark:bg-[#1c1c1e] rounded-xl shadow-sm border border-[#e5e5e5] dark:border-[#2c2c2e] overflow-hidden;
   }
   
   .apple-button {
-    @apply rounded-full bg-primary text-white font-medium transition-all;
+    @apply rounded-full bg-primary text-white font-medium transition-all hover:brightness-105;
   }
   
   .apple-input {
@@ -111,11 +115,17 @@
   }
   
   .apple-nav {
-    @apply backdrop-blur-md bg-white/80 dark:bg-black/80 border-b border-[#e5e5e5] dark:border-[#2c2c2e];
+    @apply backdrop-blur-md bg-white/90 dark:bg-black/80 border-b border-[#e5e5e5] dark:border-[#2c2c2e] sticky top-0 z-10;
   }
   
   .sf-pro-text {
-    font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.022em;
+  }
+  
+  .sf-pro-display {
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.021em;
   }
 }
 
@@ -125,7 +135,7 @@
   }
   
   .hover-scale {
-    @apply transition-transform duration-200 hover:scale-105;
+    @apply transition-transform duration-200 hover:scale-[1.03];
   }
   
   .glass-morphism {

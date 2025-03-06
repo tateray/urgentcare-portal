@@ -1,5 +1,6 @@
+
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,9 +10,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Heart, Shield, User } from "lucide-react";
+import { 
+  Heart, 
+  Shield, 
+  User, 
+  Ambulance, 
+  Building, 
+  History, 
+  MessageCircle, 
+  PhoneCall,
+  UserCircle
+} from "lucide-react";
+import SettingsMenu from "@/components/SettingsMenu";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   const renderHeroSection = () => (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-4 text-center">
@@ -23,11 +37,13 @@ const Index = () => {
           professionals in Zimbabwe.
         </p>
         <div className="flex justify-center gap-4">
-          <Button size="lg" asChild>
-            <Link to="/hospital-locator">Find a Hospital</Link>
+          <Button size="lg" onClick={() => navigate("/hospital-locator")}>
+            <Building className="mr-2" />
+            Find a Hospital
           </Button>
-          <Button variant="outline" size="lg" asChild>
-            <Link to="/ambulance">Book an Ambulance</Link>
+          <Button variant="outline" size="lg" onClick={() => navigate("/ambulance")}>
+            <Ambulance className="mr-2" />
+            Book an Ambulance
           </Button>
         </div>
       </div>
@@ -40,10 +56,17 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <Card className="apple-card hover-scale">
             <CardHeader>
-              <CardTitle className="text-xl">Emergency Assistance</CardTitle>
-              <CardDescription>
-                Fast and reliable ambulance booking service.
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="bg-red-100 dark:bg-red-900/20 w-10 h-10 rounded-full flex items-center justify-center">
+                  <Ambulance className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Emergency Assistance</CardTitle>
+                  <CardDescription>
+                    Fast and reliable ambulance booking service.
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
@@ -55,10 +78,17 @@ const Index = () => {
 
           <Card className="apple-card hover-scale">
             <CardHeader>
-              <CardTitle className="text-xl">Find Hospitals & Clinics</CardTitle>
-              <CardDescription>
-                Locate nearby healthcare facilities.
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="bg-blue-100 dark:bg-blue-900/20 w-10 h-10 rounded-full flex items-center justify-center">
+                  <Building className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Find Hospitals & Clinics</CardTitle>
+                  <CardDescription>
+                    Locate nearby healthcare facilities.
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
@@ -70,10 +100,17 @@ const Index = () => {
 
           <Card className="apple-card hover-scale">
             <CardHeader>
-              <CardTitle className="text-xl">Medical History Tracking</CardTitle>
-              <CardDescription>
-                Keep track of your health records.
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="bg-green-100 dark:bg-green-900/20 w-10 h-10 rounded-full flex items-center justify-center">
+                  <History className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Medical History Tracking</CardTitle>
+                  <CardDescription>
+                    Keep track of your health records.
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
@@ -85,10 +122,17 @@ const Index = () => {
 
           <Card className="apple-card hover-scale">
             <CardHeader>
-              <CardTitle className="text-xl">Chat with Doctors</CardTitle>
-              <CardDescription>
-                Consult with healthcare professionals online.
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="bg-purple-100 dark:bg-purple-900/20 w-10 h-10 rounded-full flex items-center justify-center">
+                  <MessageCircle className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Chat with Doctors</CardTitle>
+                  <CardDescription>
+                    Consult with healthcare professionals online.
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
@@ -100,10 +144,17 @@ const Index = () => {
 
           <Card className="apple-card hover-scale">
             <CardHeader>
-              <CardTitle className="text-xl">Emergency Contacts</CardTitle>
-              <CardDescription>
-                Manage your emergency contact list.
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="bg-orange-100 dark:bg-orange-900/20 w-10 h-10 rounded-full flex items-center justify-center">
+                  <PhoneCall className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Emergency Contacts</CardTitle>
+                  <CardDescription>
+                    Manage your emergency contact list.
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
@@ -115,10 +166,17 @@ const Index = () => {
 
           <Card className="apple-card hover-scale">
             <CardHeader>
-              <CardTitle className="text-xl">Profile Management</CardTitle>
-              <CardDescription>
-                Control your personal health information.
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="bg-gray-100 dark:bg-gray-900/20 w-10 h-10 rounded-full flex items-center justify-center">
+                  <UserCircle className="h-5 w-5 text-gray-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Profile Management</CardTitle>
+                  <CardDescription>
+                    Control your personal health information.
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
@@ -142,8 +200,9 @@ const Index = () => {
           Experience the future of healthcare in Zimbabwe. Sign up today and
           take control of your health.
         </p>
-        <Button size="lg" variant="secondary" asChild>
-          <Link to="/auth">Sign Up Now</Link>
+        <Button size="lg" variant="secondary" onClick={() => navigate("/auth")}>
+          <User className="mr-2" />
+          Sign Up Now
         </Button>
       </div>
     </section>
@@ -163,12 +222,15 @@ const Index = () => {
 
   const renderAuthButtons = () => (
     <div className="flex gap-2">
-      <Button variant="outline" asChild>
-        <Link to="/auth">Sign In</Link>
+      <Button variant="outline" onClick={() => navigate("/auth")}>
+        <User className="mr-2 h-4 w-4" />
+        Sign In
       </Button>
-      <Button asChild>
-        <Link to="/auth">Sign Up</Link>
+      <Button onClick={() => navigate("/auth")}>
+        <User className="mr-2 h-4 w-4" />
+        Sign Up
       </Button>
+      <SettingsMenu />
     </div>
   );
 
@@ -216,8 +278,8 @@ const Index = () => {
                   <p>Get emergency assistance</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" asChild>
-                    <Link to="/auth">Sign Up Now</Link>
+                  <Button className="w-full" onClick={() => navigate("/auth")}>
+                    Sign Up Now
                   </Button>
                 </CardFooter>
               </Card>
@@ -236,8 +298,8 @@ const Index = () => {
                   <p>View patient profiles</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" variant="outline" asChild>
-                    <Link to="/auth">Request Access</Link>
+                  <Button className="w-full" variant="outline" onClick={() => navigate("/auth")}>
+                    Request Access
                   </Button>
                 </CardFooter>
               </Card>
