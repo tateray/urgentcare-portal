@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Shield, User } from "lucide-react";
+import { Heart, Shield, User } from "lucide-react";
 
 const Index = () => {
   const renderHeroSection = () => (
