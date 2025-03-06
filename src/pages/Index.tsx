@@ -4,26 +4,43 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Phone, MapPin, History, MessageCircle, Ambulance, Heart, Bell, User, Settings, Moon, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
-const EmergencyButton = ({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) => (
-  <Button 
-    variant="destructive" 
-    className="flex flex-col items-center justify-center h-24 w-full gap-2 transition-all hover:scale-105"
-    onClick={onClick}
-  >
-    {icon}
-    <span>{label}</span>
-  </Button>
-);
-
-const QuickAccessCard = ({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) => (
-  <Card className="cursor-pointer hover:shadow-md transition-all hover:scale-105" onClick={onClick}>
-    <CardContent className="p-6 flex flex-col items-center justify-center">
+const EmergencyButton = ({ icon, label, onClick, to }: { icon: React.ReactNode; label: string; onClick?: () => void; to?: string }) => {
+  const button = (
+    <Button 
+      variant="destructive" 
+      className="flex flex-col items-center justify-center h-24 w-full gap-2 transition-all hover:scale-105"
+      onClick={onClick}
+    >
       {icon}
-      <p className="mt-2 text-center font-medium">{label}</p>
-    </CardContent>
-  </Card>
-);
+      <span>{label}</span>
+    </Button>
+  );
+  
+  if (to) {
+    return <Link to={to}>{button}</Link>;
+  }
+  
+  return button;
+};
+
+const QuickAccessCard = ({ icon, label, onClick, to }: { icon: React.ReactNode; label: string; onClick?: () => void; to?: string }) => {
+  const card = (
+    <Card className="cursor-pointer hover:shadow-md transition-all hover:scale-105" onClick={onClick}>
+      <CardContent className="p-6 flex flex-col items-center justify-center">
+        {icon}
+        <p className="mt-2 text-center font-medium">{label}</p>
+      </CardContent>
+    </Card>
+  );
+  
+  if (to) {
+    return <Link to={to}>{card}</Link>;
+  }
+  
+  return card;
+};
 
 const Index = () => {
   const { toast } = useToast();
@@ -56,39 +73,6 @@ const Index = () => {
     }, 1000);
   };
 
-  const handleFindHospital = () => {
-    toast({
-      title: "Finding Nearby Hospitals",
-      description: "Loading hospital locations...",
-    });
-    // This would navigate to the hospital locator page in a real app
-  };
-
-  const handleMedicalHistory = () => {
-    toast({
-      title: "Accessing Medical Records",
-      description: "Loading your medical history...",
-    });
-    // This would navigate to the medical history page in a real app
-  };
-
-  const handleAmbulance = () => {
-    toast({
-      title: "Ambulance Request",
-      description: "Connecting to ambulance services...",
-      variant: "destructive",
-    });
-    // This would navigate to the ambulance booking page in a real app
-  };
-
-  const handleChatWithDoctor = () => {
-    toast({
-      title: "Medical Assistant",
-      description: "Connecting to a medical professional...",
-    });
-    // This would navigate to the chat page in a real app
-  };
-
   return (
     <div className={`min-h-screen bg-background text-foreground`}>
       {/* Header */}
@@ -104,9 +88,11 @@ const Index = () => {
           <Button variant="outline" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
-          <Button variant="outline" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+          <Link to="/profile">
+            <Button variant="outline" size="icon">
+              <User className="h-5 w-5" />
+            </Button>
+          </Link>
           <Button variant="outline" size="icon">
             <Settings className="h-5 w-5" />
           </Button>
@@ -135,8 +121,8 @@ const Index = () => {
                 />
                 <EmergencyButton 
                   icon={<Ambulance className="h-8 w-8" />} 
-                  label="Book Ambulance" 
-                  onClick={handleAmbulance} 
+                  label="Book Ambulance"
+                  to="/ambulance"
                 />
               </div>
             </CardContent>
@@ -149,23 +135,23 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <QuickAccessCard 
               icon={<MapPin className="h-8 w-8 text-primary" />} 
-              label="Find Hospital" 
-              onClick={handleFindHospital} 
+              label="Find Hospital"
+              to="/hospital-locator"
             />
             <QuickAccessCard 
               icon={<History className="h-8 w-8 text-primary" />} 
-              label="Medical History" 
-              onClick={handleMedicalHistory} 
+              label="Medical History"
+              to="/medical-history"
             />
             <QuickAccessCard 
               icon={<MessageCircle className="h-8 w-8 text-primary" />} 
-              label="Chat with Doctor" 
-              onClick={handleChatWithDoctor} 
+              label="Chat with Doctor"
+              to="/chat"
             />
             <QuickAccessCard 
               icon={<Phone className="h-8 w-8 text-primary" />} 
-              label="Emergency Contacts" 
-              onClick={() => toast({ title: "Emergency Contacts", description: "Accessing your emergency contacts..." })} 
+              label="Emergency Contacts"
+              to="/emergency-contacts"
             />
           </div>
         </section>
@@ -182,9 +168,11 @@ const Index = () => {
             <CardContent>
               <div className="p-6 text-center">
                 <p className="mb-4">Need medical advice? Our AI assistant can help answer your questions.</p>
-                <Button onClick={() => toast({ title: "AI Assistant", description: "Initializing medical assistant..." })}>
-                  Ask Medical Question
-                </Button>
+                <Link to="/chat">
+                  <Button>
+                    Ask Medical Question
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
