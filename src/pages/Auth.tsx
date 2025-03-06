@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Mail, Lock, Phone, Eye, EyeOff } from "lucide-react";
+import { Heart, Mail, Lock, Phone, Eye, EyeOff, ShieldCheck, ArrowLeft } from "lucide-react";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Auth = () => {
   const { toast } = useToast();
@@ -19,6 +20,7 @@ const Auth = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState<"user" | "admin">("user");
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +53,13 @@ const Auth = () => {
           title: "Welcome Back",
           description: "You have successfully logged in",
         });
-        navigate("/");
+        
+        // Redirect based on user type
+        if (userType === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else {
         // Sign up
         await createUserWithEmailAndPassword(auth, email, password);
@@ -99,12 +107,20 @@ const Auth = () => {
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md apple-card">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-2">
-            <Heart className="text-destructive h-10 w-10" />
+          <div className="flex justify-between items-center mb-2">
+            <Link to="/">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div className="flex justify-center">
+              <Heart className="text-destructive h-10 w-10" />
+            </div>
+            <div className="w-8"></div> {/* Empty div for alignment */}
           </div>
-          <CardTitle className="text-2xl">
+          <CardTitle className="text-2xl sf-pro-text">
             {isLogin ? "Sign In" : "Create Account"}
           </CardTitle>
           <CardDescription>
@@ -115,6 +131,27 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <Tabs 
+            value={userType} 
+            onValueChange={(value) => setUserType(value as "user" | "admin")}
+            className="mb-6"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="user">User</TabsTrigger>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
+            </TabsList>
+            <TabsContent value="user">
+              <p className="text-sm text-muted-foreground mb-4">
+                Login as a standard user to access emergency services, medical history, and more.
+              </p>
+            </TabsContent>
+            <TabsContent value="admin">
+              <p className="text-sm text-muted-foreground mb-4">
+                Admin access for emergency services management, ambulance tracking, and system administration.
+              </p>
+            </TabsContent>
+          </Tabs>
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
@@ -128,7 +165,7 @@ const Auth = () => {
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 apple-input"
                   required
                 />
               </div>
@@ -146,7 +183,7 @@ const Auth = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 apple-input"
                   required
                 />
                 <Button
@@ -177,6 +214,7 @@ const Auth = () => {
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="apple-input"
                     required
                   />
                 </div>
@@ -193,7 +231,7 @@ const Auth = () => {
                       placeholder="+263 71 234 5678"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="pl-9"
+                      className="pl-9 apple-input"
                     />
                   </div>
                 </div>
@@ -202,10 +240,10 @@ const Auth = () => {
             
             <Button
               type="submit"
-              className="w-full"
+              className="w-full apple-button"
               disabled={loading}
             >
-              {isLogin ? "Sign In" : "Create Account"}
+              {isLogin ? (userType === "admin" ? "Admin Sign In" : "Sign In") : "Create Account"}
             </Button>
           </form>
           
@@ -245,6 +283,18 @@ const Auth = () => {
               {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
             </Button>
           </div>
+          
+          {userType === "admin" && isLogin && (
+            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 rounded-lg text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <ShieldCheck className="h-5 w-5 text-orange-600 dark:text-orange-500" />
+                <span className="font-medium text-orange-600 dark:text-orange-500">Admin Access</span>
+              </div>
+              <p className="text-xs text-orange-600 dark:text-orange-500">
+                This area is restricted to authorized hospital and emergency service administrators only.
+              </p>
+            </div>
+          )}
         </CardFooter>
       </Card>
     </div>

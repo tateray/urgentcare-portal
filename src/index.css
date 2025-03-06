@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -31,7 +31,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.5rem;
 
@@ -55,7 +55,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -91,6 +91,31 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Apple Design Language Inspired Styles */
+@layer components {
+  .apple-card {
+    @apply bg-white dark:bg-[#1c1c1e] rounded-xl shadow-sm border border-[#e5e5e5] dark:border-[#2c2c2e];
+  }
+  
+  .apple-button {
+    @apply rounded-full bg-primary text-white font-medium transition-all;
+  }
+  
+  .apple-input {
+    @apply bg-[#f5f5f5] dark:bg-[#2c2c2e] border-0 rounded-lg focus:ring-2 focus:ring-blue-500;
+  }
+  
+  .apple-nav {
+    @apply backdrop-blur-md bg-white/80 dark:bg-black/80 border-b border-[#e5e5e5] dark:border-[#2c2c2e];
+  }
+  
+  .sf-pro-text {
+    font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   }
 }
 
@@ -109,6 +134,27 @@
   
   .emergency-pulse {
     animation: pulse 2s infinite;
+  }
+  
+  /* Accessibility Classes */
+  .high-contrast {
+    --foreground: 0 0% 0%;
+    --background: 0 0% 100%;
+    --primary: 240 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 0%;
+    --border: 0 0% 0%;
+    --ring: 240 100% 50%;
+  }
+  
+  .large-text {
+    font-size: 120% !important;
+  }
+  
+  .reduce-motion * {
+    transition: none !important;
+    animation: none !important;
   }
 }
 

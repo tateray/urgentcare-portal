@@ -13,6 +13,7 @@ import AmbulanceBooking from "./pages/AmbulanceBooking";
 import ChatWithDoctor from "./pages/ChatWithDoctor";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/chat" element={<ChatWithDoctor />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
