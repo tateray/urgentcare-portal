@@ -58,7 +58,7 @@ const Auth = () => {
         if (userType === "admin") {
           navigate("/admin");
         } else {
-          navigate("/");
+          navigate("/user-dashboard");
         }
       } else {
         // Sign up
@@ -67,7 +67,7 @@ const Auth = () => {
           title: "Account Created",
           description: "Your account has been created successfully",
         });
-        navigate("/");
+        navigate("/user-dashboard");
       }
     } catch (error: any) {
       toast({

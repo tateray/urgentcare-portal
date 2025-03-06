@@ -1,244 +1,253 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Phone, MapPin, History, MessageCircle, Ambulance, Heart, Bell, User, Settings, Moon, Sun } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import React from "react";
 import { Link } from "react-router-dom";
-import SettingsPanel from "@/components/SettingsPanel";
-import PhonebookDialer from "@/components/PhonebookDialer";
-
-const EmergencyButton = ({ icon, label, onClick, to }: { icon: React.ReactNode; label: string; onClick?: () => void; to?: string }) => {
-  const button = (
-    <Button 
-      variant="destructive" 
-      className="flex flex-col items-center justify-center h-24 w-full gap-2 transition-all hover:scale-105 sf-pro-text"
-      onClick={onClick}
-    >
-      {icon}
-      <span>{label}</span>
-    </Button>
-  );
-  
-  if (to) {
-    return <Link to={to}>{button}</Link>;
-  }
-  
-  return button;
-};
-
-const QuickAccessCard = ({ icon, label, onClick, to }: { icon: React.ReactNode; label: string; onClick?: () => void; to?: string }) => {
-  const card = (
-    <Card className="cursor-pointer hover:shadow-md transition-all hover:scale-105 apple-card" onClick={onClick}>
-      <CardContent className="p-6 flex flex-col items-center justify-center">
-        {icon}
-        <p className="mt-2 text-center font-medium sf-pro-text">{label}</p>
-      </CardContent>
-    </Card>
-  );
-  
-  if (to) {
-    return <Link to={to}>{card}</Link>;
-  }
-  
-  return card;
-};
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Shield, User } from "lucide-react";
 
 const Index = () => {
-  const { toast } = useToast();
-  const [darkMode, setDarkMode] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showPhonebook, setShowPhonebook] = useState(false);
+  const renderHeroSection = () => (
+    <section className="py-24 bg-background">
+      <div className="container mx-auto px-4 text-center">
+        <h1 className="text-4xl md:text-5xl font-bold mb-6 sf-pro-text">
+          Your Health, Our Priority
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+          Connecting you with the best emergency services and healthcare
+          professionals in Zimbabwe.
+        </p>
+        <div className="flex justify-center gap-4">
+          <Button size="lg" asChild>
+            <Link to="/hospital-locator">Find a Hospital</Link>
+          </Button>
+          <Button variant="outline" size="lg" asChild>
+            <Link to="/ambulance">Book an Ambulance</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
 
-  useEffect(() => {
-    // Check if dark mode preference was saved
-    const savedMode = localStorage.getItem('darkMode');
-    if (savedMode === 'true') {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
+  const renderFeaturesSection = () => (
+    <section className="py-16 bg-muted">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Card className="apple-card hover-scale">
+            <CardHeader>
+              <CardTitle className="text-xl">Emergency Assistance</CardTitle>
+              <CardDescription>
+                Fast and reliable ambulance booking service.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Get immediate help in critical situations with our 24/7
+                emergency response.
+              </p>
+            </CardContent>
+          </Card>
 
-  const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    
-    // Apply dark mode class to document
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    
-    // Save preference
-    localStorage.setItem('darkMode', String(newMode));
-    
-    toast({
-      title: newMode ? "Dark Mode Activated" : "Light Mode Activated",
-      description: "Your display preferences have been updated",
-    });
-  };
+          <Card className="apple-card hover-scale">
+            <CardHeader>
+              <CardTitle className="text-xl">Find Hospitals & Clinics</CardTitle>
+              <CardDescription>
+                Locate nearby healthcare facilities.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Discover the nearest hospitals, clinics, and pharmacies with
+                our comprehensive locator tool.
+              </p>
+            </CardContent>
+          </Card>
 
-  const handleEmergencyCall = () => {
-    setShowPhonebook(true);
-  };
+          <Card className="apple-card hover-scale">
+            <CardHeader>
+              <CardTitle className="text-xl">Medical History Tracking</CardTitle>
+              <CardDescription>
+                Keep track of your health records.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Securely store and manage your medical history, appointments,
+                and prescriptions in one place.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="apple-card hover-scale">
+            <CardHeader>
+              <CardTitle className="text-xl">Chat with Doctors</CardTitle>
+              <CardDescription>
+                Consult with healthcare professionals online.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Connect with qualified doctors and specialists for virtual
+                consultations and medical advice.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="apple-card hover-scale">
+            <CardHeader>
+              <CardTitle className="text-xl">Emergency Contacts</CardTitle>
+              <CardDescription>
+                Manage your emergency contact list.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Store and quickly access your emergency contacts in case of
+                urgent situations.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="apple-card hover-scale">
+            <CardHeader>
+              <CardTitle className="text-xl">Profile Management</CardTitle>
+              <CardDescription>
+                Control your personal health information.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Customize your profile, manage your preferences, and ensure
+                your data is always up-to-date.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </section>
+  );
+
+  const renderCTASection = () => (
+    <section className="py-20 bg-primary text-white">
+      <div className="container mx-auto px-4 text-center">
+        <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          Ready to Get Started?
+        </h2>
+        <p className="text-lg max-w-2xl mx-auto mb-8">
+          Experience the future of healthcare in Zimbabwe. Sign up today and
+          take control of your health.
+        </p>
+        <Button size="lg" variant="secondary" asChild>
+          <Link to="/auth">Sign Up Now</Link>
+        </Button>
+      </div>
+    </section>
+  );
+
+  const renderFooter = () => (
+    <footer className="py-8 bg-background border-t">
+      <div className="container mx-auto px-4 text-center text-muted-foreground">
+        <p>&copy; 2023 Emergency Medical Services. All rights reserved.</p>
+        <p>
+          Developed with <span className="text-destructive">❤️</span> in
+          Zimbabwe
+        </p>
+      </div>
+    </footer>
+  );
+
+  const renderAuthButtons = () => (
+    <div className="flex gap-2">
+      <Button variant="outline" asChild>
+        <Link to="/auth">Sign In</Link>
+      </Button>
+      <Button asChild>
+        <Link to="/auth">Sign Up</Link>
+      </Button>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-background text-foreground sf-pro-text">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border py-4 px-6 flex justify-between items-center shadow-sm apple-nav">
-        <div className="flex items-center gap-2">
-          <Heart className="text-destructive h-6 w-6" />
-          <h1 className="text-xl font-semibold">Emergency Medical Assistance</h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
-            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
-          <Link to="/profile">
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
+    <div className="min-h-screen flex flex-col">
+      <header className="apple-nav py-4 px-4 sm:px-6">
+        <div className="container mx-auto flex justify-between items-center">
+          <Link to="/" className="flex items-center gap-2">
+            <Heart className="text-destructive h-6 w-6" />
+            <span className="font-bold text-xl sf-pro-text">
+              Emergency Medical Services
+            </span>
           </Link>
-          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
-            <Settings className="h-5 w-5" />
-          </Button>
+          <nav>{renderAuthButtons()}</nav>
         </div>
       </header>
 
-      <main className="container mx-auto py-8 px-4">
-        {/* Emergency Actions */}
-        <section className="mb-8">
-          <Card className="border-destructive apple-card">
-            <CardHeader>
-              <CardTitle className="text-destructive flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Emergency Services
-              </CardTitle>
-              <CardDescription>
-                Quick access to critical emergency services
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <EmergencyButton 
-                  icon={<Phone className="h-8 w-8" />} 
-                  label="Emergency Call" 
-                  onClick={handleEmergencyCall} 
-                />
-                <EmergencyButton 
-                  icon={<Ambulance className="h-8 w-8" />} 
-                  label="Book Ambulance"
-                  to="/ambulance"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-        
-        {/* Phonebook Section (conditionally rendered) */}
-        {showPhonebook && (
-          <section className="mb-8">
-            <Card className="apple-card">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Emergency Contacts</CardTitle>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setShowPhonebook(false)}
-                  >
-                    Close
+      <main className="flex-grow">
+        {renderHeroSection()}
+        {renderFeaturesSection()}
+        <section className="py-12 bg-muted/50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-4">
+                Create Your Health Account
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Sign up for a personalized account to access your medical
+                history, track appointments, and get faster emergency services
+                when needed.
+              </p>
+            </div>
+            <div className="flex flex-col md:flex-row gap-8 justify-center">
+              <Card className="w-full md:w-80 apple-card">
+                <CardHeader className="text-center">
+                  <div className="bg-blue-100 dark:bg-blue-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <User className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <CardTitle>Patient Account</CardTitle>
+                  <CardDescription>For individuals seeking care</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 text-center">
+                  <p>Access medical records</p>
+                  <p>Schedule appointments</p>
+                  <p>Get emergency assistance</p>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" asChild>
+                    <Link to="/auth">Sign Up Now</Link>
                   </Button>
-                </div>
-                <CardDescription>
-                  Call emergency services or personal contacts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PhonebookDialer />
-              </CardContent>
-            </Card>
-          </section>
-        )}
+                </CardFooter>
+              </Card>
 
-        {/* Quick Access Services */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Quick Access</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <QuickAccessCard 
-              icon={<MapPin className="h-8 w-8 text-primary" />} 
-              label="Find Hospital"
-              to="/hospital-locator"
-            />
-            <QuickAccessCard 
-              icon={<History className="h-8 w-8 text-primary" />} 
-              label="Medical History"
-              to="/medical-history"
-            />
-            <QuickAccessCard 
-              icon={<MessageCircle className="h-8 w-8 text-primary" />} 
-              label="Chat with Doctor"
-              to="/chat"
-            />
-            <QuickAccessCard 
-              icon={<Phone className="h-8 w-8 text-primary" />} 
-              label="Emergency Contacts"
-              to="/emergency-contacts"
-            />
+              <Card className="w-full md:w-80 apple-card">
+                <CardHeader className="text-center">
+                  <div className="bg-red-100 dark:bg-red-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <Shield className="h-6 w-6 text-red-600" />
+                  </div>
+                  <CardTitle>Admin Access</CardTitle>
+                  <CardDescription>For healthcare providers</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 text-center">
+                  <p>Manage ambulance fleet</p>
+                  <p>Track emergency requests</p>
+                  <p>View patient profiles</p>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" variant="outline" asChild>
+                    <Link to="/auth">Request Access</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
           </div>
         </section>
-
-        {/* Medical Query Section */}
-        <section className="mb-8">
-          <Card className="apple-card">
-            <CardHeader>
-              <CardTitle>Medical Assistant</CardTitle>
-              <CardDescription>
-                Ask questions about symptoms or medical concerns
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="p-6 text-center">
-                <p className="mb-4">Need medical advice? Our AI assistant can help answer your questions.</p>
-                <Link to="/chat">
-                  <Button className="apple-button">
-                    Ask Medical Question
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+        {renderCTASection()}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-muted py-6 px-4 text-center">
-        <div className="container mx-auto">
-          <p className="text-muted-foreground">
-            © 2023 Emergency Medical Assistance | In case of life-threatening emergency, call local emergency services immediately
-          </p>
-          <div className="mt-2 flex justify-center gap-4">
-            <Button variant="link" size="sm">English</Button>
-            <Button variant="link" size="sm">Shona</Button>
-            <Button variant="link" size="sm">Ndebele</Button>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            <Link to="/auth">User Login</Link> | <Link to="/admin">Admin Portal</Link>
-          </p>
-        </div>
-      </footer>
-
-      {/* Settings Panel */}
-      <SettingsPanel
-        open={showSettings}
-        onClose={() => setShowSettings(false)}
-        darkMode={darkMode}
-        toggleDarkMode={toggleDarkMode}
-      />
+      {renderFooter()}
     </div>
   );
 };
