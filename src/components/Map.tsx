@@ -84,10 +84,11 @@ const Map = () => {
       );
 
       // Add hospitals markers (mock data for now)
+      // Fix: Explicitly type the lngLat as [number, number] tuples instead of number[]
       const hospitals = [
-        { lngLat: [31.04, -17.82], name: "Parirenyatwa Hospital" },
-        { lngLat: [31.05, -17.84], name: "Harare Central Hospital" },
-        { lngLat: [31.03, -17.83], name: "Avenues Clinic" }
+        { lngLat: [31.04, -17.82] as [number, number], name: "Parirenyatwa Hospital" },
+        { lngLat: [31.05, -17.84] as [number, number], name: "Harare Central Hospital" },
+        { lngLat: [31.03, -17.83] as [number, number], name: "Avenues Clinic" }
       ];
 
       hospitals.forEach(hospital => {
