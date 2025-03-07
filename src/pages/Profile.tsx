@@ -6,11 +6,9 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, User, Save, LogOut, Settings, Moon, Sun, Image, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 const Profile = () => {
   const { toast } = useToast();
-  const { language, setLanguage, t } = useLanguage();
   const [darkMode, setDarkMode] = useState(false);
   const [name, setName] = useState("John Doe");
   const [email, setEmail] = useState("john.doe@example.com");
@@ -58,7 +56,7 @@ const Profile = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold">{t('profile')}</h1>
+        <h1 className="text-2xl font-bold">My Profile</h1>
         
         <div className="ml-auto flex gap-2">
           <Button variant="outline" size="icon" onClick={toggleDarkMode}>
@@ -80,9 +78,9 @@ const Profile = () => {
         <div className="lg:col-span-1">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>{t('profilePicture')}</CardTitle>
+              <CardTitle>Profile Picture</CardTitle>
               <CardDescription>
-                {t('manageProfileImage')}
+                Manage your profile image
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
@@ -117,7 +115,7 @@ const Profile = () => {
                   }}
                 >
                   <Image className="h-4 w-4 mr-2" />
-                  {t('upload')}
+                  Upload
                 </Button>
                 
                 <Button 
@@ -131,7 +129,7 @@ const Profile = () => {
                   }}
                 >
                   <Camera className="h-4 w-4 mr-2" />
-                  {t('takePhoto')}
+                  Take Photo
                 </Button>
               </div>
             </CardContent>
@@ -139,9 +137,9 @@ const Profile = () => {
           
           <Card className="mt-6">
             <CardHeader className="pb-2">
-              <CardTitle>{t('languageSettings')}</CardTitle>
+              <CardTitle>Language Settings</CardTitle>
               <CardDescription>
-                {t('chooseLanguage')}
+                Choose your preferred language
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -150,18 +148,15 @@ const Profile = () => {
                   variant="outline" 
                   className="w-full justify-start"
                   onClick={() => {
-                    setLanguage('english');
                     toast({
                       title: "Language Changed",
                       description: "Language set to English",
                     });
                   }}
                 >
-                  {language === 'english' && (
-                    <span className="w-6 h-6 mr-2 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-primary-foreground text-xs">✓</span>
-                    </span>
-                  )}
+                  <span className="w-6 h-6 mr-2 rounded-full bg-primary flex items-center justify-center">
+                    <span className="text-primary-foreground text-xs">✓</span>
+                  </span>
                   English
                 </Button>
                 
@@ -169,18 +164,12 @@ const Profile = () => {
                   variant="outline" 
                   className="w-full justify-start"
                   onClick={() => {
-                    setLanguage('shona');
                     toast({
                       title: "Language Changed",
                       description: "Language set to Shona",
                     });
                   }}
                 >
-                  {language === 'shona' && (
-                    <span className="w-6 h-6 mr-2 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-primary-foreground text-xs">✓</span>
-                    </span>
-                  )}
                   Shona
                 </Button>
                 
@@ -188,18 +177,12 @@ const Profile = () => {
                   variant="outline" 
                   className="w-full justify-start"
                   onClick={() => {
-                    setLanguage('ndebele');
                     toast({
                       title: "Language Changed",
                       description: "Language set to Ndebele",
                     });
                   }}
                 >
-                  {language === 'ndebele' && (
-                    <span className="w-6 h-6 mr-2 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-primary-foreground text-xs">✓</span>
-                    </span>
-                  )}
                   Ndebele
                 </Button>
               </div>
@@ -210,9 +193,9 @@ const Profile = () => {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>{t('personalInfo')}</CardTitle>
+              <CardTitle>Personal Information</CardTitle>
               <CardDescription>
-                {t('managePersonal')}
+                Manage your personal details
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -220,7 +203,7 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="name" className="text-sm font-medium">
-                      {t('fullName')}
+                      Full Name
                     </label>
                     <Input
                       id="name"
@@ -232,7 +215,7 @@ const Profile = () => {
                   
                   <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-medium">
-                      {t('emailAddress')}
+                      Email Address
                     </label>
                     <Input
                       id="email"
@@ -247,7 +230,7 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="phone" className="text-sm font-medium">
-                      {t('phoneNumber')}
+                      Phone Number
                     </label>
                     <Input
                       id="phone"
@@ -260,7 +243,7 @@ const Profile = () => {
                   
                   <div className="space-y-2">
                     <label htmlFor="nationalID" className="text-sm font-medium">
-                      {t('nationalID')}
+                      National ID
                     </label>
                     <Input
                       id="nationalID"
@@ -279,11 +262,11 @@ const Profile = () => {
                     variant="outline" 
                     onClick={() => setIsEditing(false)}
                   >
-                    {t('cancel')}
+                    Cancel
                   </Button>
                   <Button onClick={handleSaveProfile}>
                     <Save className="h-4 w-4 mr-2" />
-                    {t('saveChanges')}
+                    Save Changes
                   </Button>
                 </>
               ) : (
@@ -292,7 +275,7 @@ const Profile = () => {
                   onClick={() => setIsEditing(true)}
                   className="ml-auto"
                 >
-                  {t('editProfile')}
+                  Edit Profile
                 </Button>
               )}
             </CardFooter>
@@ -300,9 +283,9 @@ const Profile = () => {
           
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle>{t('medicalInfo')}</CardTitle>
+              <CardTitle>Medical Information</CardTitle>
               <CardDescription>
-                {t('importantHealth')}
+                Important health information for emergencies
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -310,7 +293,7 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="bloodType" className="text-sm font-medium">
-                      {t('bloodType')}
+                      Blood Type
                     </label>
                     <select 
                       id="bloodType" 
@@ -331,7 +314,7 @@ const Profile = () => {
                   
                   <div className="space-y-2">
                     <label htmlFor="allergies" className="text-sm font-medium">
-                      {t('allergies')}
+                      Allergies
                     </label>
                     <Input
                       id="allergies"
@@ -343,7 +326,7 @@ const Profile = () => {
                 
                 <div className="space-y-2">
                   <label htmlFor="conditions" className="text-sm font-medium">
-                    {t('medicalConditions')}
+                    Medical Conditions
                   </label>
                   <Input
                     id="conditions"
@@ -354,7 +337,7 @@ const Profile = () => {
                 
                 <div className="space-y-2">
                   <label htmlFor="medications" className="text-sm font-medium">
-                    {t('currentMedications')}
+                    Current Medications
                   </label>
                   <Input
                     id="medications"
@@ -365,7 +348,7 @@ const Profile = () => {
                 
                 <div className="space-y-2">
                   <label htmlFor="emergencyContact" className="text-sm font-medium">
-                    {t('emergencyContact')}
+                    Emergency Contact
                   </label>
                   <Input
                     id="emergencyContact"
@@ -378,7 +361,7 @@ const Profile = () => {
             <CardFooter>
               <Link to="/medical-history" className="w-full">
                 <Button variant="outline" className="w-full">
-                  {t('viewFullMedical')}
+                  View Full Medical History
                 </Button>
               </Link>
             </CardFooter>
