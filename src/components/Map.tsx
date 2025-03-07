@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import * as L from 'leaflet';
+import L from 'leaflet';
 import { Button } from "@/components/ui/button";
 import { Download, Layers } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // An internal component that animates the map to a specific location
-const MapFlyTo = ({ center }: { center: L.LatLngExpression }) => {
+const MapFlyTo = ({ center }: { center: [number, number] }) => {
   const map = useMap();
   useEffect(() => {
     map.flyTo(center, map.getZoom());
@@ -26,7 +26,7 @@ const Map = () => {
   const [isOfflineAvailable, setIsOfflineAvailable] = useState(false);
   
   // Zimbabwe center coordinates
-  const center: L.LatLngExpression = [-17.83, 31.05];
+  const center: [number, number] = [-17.83, 31.05];
   
   // Fix Leaflet default icon
   useEffect(() => {
@@ -34,9 +34,9 @@ const Map = () => {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     
     L.Icon.Default.mergeOptions({
-      iconUrl: markerIcon.src || markerIcon,
-      iconRetinaUrl: markerIcon2x.src || markerIcon2x,
-      shadowUrl: markerShadow.src || markerShadow,
+      iconUrl: markerIcon,
+      iconRetinaUrl: markerIcon2x,
+      shadowUrl: markerShadow,
     });
   }, []);
   
@@ -69,9 +69,9 @@ const Map = () => {
 
   // Sample hospital data
   const hospitals = [
-    { position: [-17.82, 31.04] as L.LatLngExpression, name: "Parirenyatwa Hospital" },
-    { position: [-17.84, 31.05] as L.LatLngExpression, name: "Harare Central Hospital" },
-    { position: [-17.83, 31.03] as L.LatLngExpression, name: "Avenues Clinic" }
+    { position: [-17.82, 31.04] as [number, number], name: "Parirenyatwa Hospital" },
+    { position: [-17.84, 31.05] as [number, number], name: "Harare Central Hospital" },
+    { position: [-17.83, 31.03] as [number, number], name: "Avenues Clinic" }
   ];
 
   return (
@@ -81,11 +81,10 @@ const Map = () => {
         zoom={12} 
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
-        attributionControl={true}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {hospitals.map((hospital, index) => (
