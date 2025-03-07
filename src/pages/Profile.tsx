@@ -6,15 +6,19 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, User, Save, LogOut, Settings, Moon, Sun, Image, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Profile = () => {
   const { toast } = useToast();
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    document.documentElement.classList.contains('dark')
+  );
   const [name, setName] = useState("John Doe");
   const [email, setEmail] = useState("john.doe@example.com");
   const [phone, setPhone] = useState("+263 71 234 5678");
   const [nationalID, setNationalID] = useState("12345678A00");
   const [isEditing, setIsEditing] = useState(false);
+  const { language, setLanguage, translations } = useLanguage();
   
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -47,6 +51,14 @@ const Profile = () => {
     // In a real app with Firebase, this would be:
     // auth.signOut().then(() => { ... })
   };
+
+  const handleLanguageChange = (newLanguage: 'english' | 'shona' | 'ndebele') => {
+    setLanguage(newLanguage);
+    toast({
+      title: "Language Changed",
+      description: `Language set to ${newLanguage}`,
+    });
+  };
   
   return (
     <div className="container mx-auto py-6 px-4">
@@ -56,7 +68,7 @@ const Profile = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold">My Profile</h1>
+        <h1 className="text-2xl font-bold">{translations.profile}</h1>
         
         <div className="ml-auto flex gap-2">
           <Button variant="outline" size="icon" onClick={toggleDarkMode}>
@@ -69,7 +81,7 @@ const Profile = () => {
           
           <Button variant="outline" onClick={handleLogout}>
             <LogOut className="h-5 w-5 mr-2" />
-            Logout
+            {translations.logout}
           </Button>
         </div>
       </div>
@@ -146,43 +158,43 @@ const Profile = () => {
               <div className="space-y-2">
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    toast({
-                      title: "Language Changed",
-                      description: "Language set to English",
-                    });
-                  }}
+                  className={`w-full justify-start ${language === 'english' ? 'bg-primary/10' : ''}`}
+                  onClick={() => handleLanguageChange('english')}
                 >
-                  <span className="w-6 h-6 mr-2 rounded-full bg-primary flex items-center justify-center">
-                    <span className="text-primary-foreground text-xs">✓</span>
-                  </span>
+                  {language === 'english' && (
+                    <span className="w-6 h-6 mr-2 rounded-full bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs">✓</span>
+                    </span>
+                  )}
+                  {!language === 'english' && <span className="w-6 h-6 mr-2"/>}
                   English
                 </Button>
                 
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    toast({
-                      title: "Language Changed",
-                      description: "Language set to Shona",
-                    });
-                  }}
+                  className={`w-full justify-start ${language === 'shona' ? 'bg-primary/10' : ''}`}
+                  onClick={() => handleLanguageChange('shona')}
                 >
+                  {language === 'shona' && (
+                    <span className="w-6 h-6 mr-2 rounded-full bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs">✓</span>
+                    </span>
+                  )}
+                  {!language === 'shona' && <span className="w-6 h-6 mr-2"/>}
                   Shona
                 </Button>
                 
                 <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    toast({
-                      title: "Language Changed",
-                      description: "Language set to Ndebele",
-                    });
-                  }}
+                  variant="outline"
+                  className={`w-full justify-start ${language === 'ndebele' ? 'bg-primary/10' : ''}`}
+                  onClick={() => handleLanguageChange('ndebele')}
                 >
+                  {language === 'ndebele' && (
+                    <span className="w-6 h-6 mr-2 rounded-full bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs">✓</span>
+                    </span>
+                  )}
+                  {!language === 'ndebele' && <span className="w-6 h-6 mr-2"/>}
                   Ndebele
                 </Button>
               </div>
