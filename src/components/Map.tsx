@@ -8,9 +8,9 @@ import { Download, Layers } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Fix for default icon image paths
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 
 // An internal component that animates the map to a specific location
 const MapFlyTo = ({ center }: { center: [number, number] }) => {
@@ -33,10 +33,12 @@ const Map = () => {
     // Fix default icon
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     
+    // Have to use this workaround since TypeScript doesn't recognize L.Icon
+    const DefaultIcon = L.Icon as any;
     L.Icon.Default.mergeOptions({
-      iconUrl: markerIcon,
-      iconRetinaUrl: markerIcon2x,
-      shadowUrl: markerShadow,
+      iconUrl: icon,
+      iconRetinaUrl: iconRetina,
+      shadowUrl: iconShadow,
     });
   }, []);
   
@@ -58,7 +60,7 @@ const Map = () => {
   }, []);
 
   // Create a custom red icon for hospitals
-  const redIcon = new L.Icon({
+  const redIcon = new (L.Icon as any)({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -83,8 +85,8 @@ const Map = () => {
         zoomControl={false}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
         {hospitals.map((hospital, index) => (
