@@ -15,6 +15,8 @@ import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
+import FireEmergency from "./pages/FireEmergency";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -25,17 +27,44 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Index />} />
           <Route path="/hospital-locator" element={<HospitalLocator />} />
-          <Route path="/medical-history" element={<MedicalHistory />} />
           <Route path="/emergency-contacts" element={<EmergencyContacts />} />
           <Route path="/ambulance" element={<AmbulanceBooking />} />
-          <Route path="/chat" element={<ChatWithDoctor />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/fire-emergency" element={<FireEmergency />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/user-dashboard" element={<UserDashboard />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+          {/* Protected routes for logged in users */}
+          <Route path="/medical-history" element={
+            <ProtectedRoute>
+              <MedicalHistory />
+            </ProtectedRoute>
+          } />
+          <Route path="/chat" element={
+            <ProtectedRoute>
+              <ChatWithDoctor />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/user-dashboard" element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Admin-only routes */}
+          <Route path="/admin" element={
+            <ProtectedRoute adminOnly>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

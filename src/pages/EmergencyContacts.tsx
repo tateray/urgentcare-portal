@@ -1,11 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Phone, User, Star, StarOff, Plus, Trash2, ArrowLeft, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import AddEmergencyNumber from "@/components/AddEmergencyNumber";
 
 // Mock emergency contacts - would be replaced with Firebase data
 const mockContacts = [
@@ -107,6 +110,15 @@ const EmergencyContacts = () => {
   const [contacts, setContacts] = useState(mockContacts);
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [user, setUser] = useState<any>(null);
+  
+  // Check if user is logged in
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
   
   const handleToggleFavorite = (id: number) => {
     setContacts(contacts.map(contact => 
@@ -151,6 +163,18 @@ const EmergencyContacts = () => {
       description: "New emergency contact has been added",
     });
   };
+
+  const handleAddEmergencyNumber = (contact: { name: string; phone: string; isDefault: boolean }) => {
+    const newContact = {
+      id: Date.now(),
+      name: contact.name,
+      phone: contact.phone,
+      isFavorite: false,
+      isDefault: contact.isDefault,
+    };
+    
+    setContacts([...contacts, newContact]);
+  };
   
   return (
     <div className="container mx-auto py-6 px-4">
@@ -164,8 +188,11 @@ const EmergencyContacts = () => {
       </div>
       
       <Card className="mb-6">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Add New Contact</CardTitle>
+          {user && (
+            <AddEmergencyNumber onAddContact={handleAddEmergencyNumber} />
+          )}
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
