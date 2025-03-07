@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,6 @@ const Profile = () => {
   
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-    // Apply dark mode class to document
     if (!darkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -166,7 +164,7 @@ const Profile = () => {
                       <span className="text-primary-foreground text-xs">✓</span>
                     </span>
                   )}
-                  {!language === 'english' && <span className="w-6 h-6 mr-2"/>}
+                  {language !== 'english' && <span className="w-6 h-6 mr-2"/>}
                   English
                 </Button>
                 
@@ -180,7 +178,7 @@ const Profile = () => {
                       <span className="text-primary-foreground text-xs">✓</span>
                     </span>
                   )}
-                  {!language === 'shona' && <span className="w-6 h-6 mr-2"/>}
+                  {language !== 'shona' && <span className="w-6 h-6 mr-2"/>}
                   Shona
                 </Button>
                 
@@ -194,7 +192,7 @@ const Profile = () => {
                       <span className="text-primary-foreground text-xs">✓</span>
                     </span>
                   )}
-                  {!language === 'ndebele' && <span className="w-6 h-6 mr-2"/>}
+                  {language !== 'ndebele' && <span className="w-6 h-6 mr-2"/>}
                   Ndebele
                 </Button>
               </div>
