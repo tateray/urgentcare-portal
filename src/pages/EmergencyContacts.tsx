@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AddEmergencyNumber from "@/components/AddEmergencyNumber";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Mock emergency contacts - would be replaced with Firebase data
 const mockContacts = [
@@ -29,11 +30,12 @@ const EmergencyContactCard = ({
   onDelete: (id: number) => void
 }) => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   
   const handleCall = () => {
     toast({
-      title: `Calling ${contact.name}`,
-      description: `Dialing ${contact.phone}...`,
+      title: `${t('calling')} ${contact.name}`,
+      description: `${t('dialing')} ${contact.phone}...`,
     });
     
     // In a real app, this would trigger the phone call
@@ -61,7 +63,7 @@ const EmergencyContactCard = ({
                 {contact.name} 
                 {contact.isDefault && (
                   <span className="ml-2 text-xs text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
-                    Default
+                    {t('default')}
                   </span>
                 )}
               </h3>
@@ -107,6 +109,7 @@ const EmergencyContactCard = ({
 
 const EmergencyContacts = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [contacts, setContacts] = useState(mockContacts);
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
@@ -184,12 +187,12 @@ const EmergencyContacts = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold">Emergency Contacts</h1>
+        <h1 className="text-2xl font-bold">{t('emergency_contacts')}</h1>
       </div>
       
       <Card className="mb-6">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Add New Contact</CardTitle>
+          <CardTitle>{t('add_new_contact')}</CardTitle>
           {user && (
             <AddEmergencyNumber onAddContact={handleAddEmergencyNumber} />
           )}
@@ -198,12 +201,12 @@ const EmergencyContacts = () => {
           <div className="grid gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                placeholder="Contact Name"
+                placeholder={t('contact_name')}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
               />
               <Input
-                placeholder="Phone Number"
+                placeholder={t('phone_number')}
                 type="tel"
                 value={newPhone}
                 onChange={(e) => setNewPhone(e.target.value)}
@@ -211,13 +214,13 @@ const EmergencyContacts = () => {
             </div>
             <Button onClick={handleAddContact}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Contact
+              {t('add_contact')}
             </Button>
           </div>
         </CardContent>
       </Card>
       
-      <h2 className="text-xl font-semibold mb-4">Favorites</h2>
+      <h2 className="text-xl font-semibold mb-4">{t('favorites')}</h2>
       {contacts.filter(c => c.isFavorite).map(contact => (
         <EmergencyContactCard 
           key={contact.id} 
@@ -227,7 +230,7 @@ const EmergencyContacts = () => {
         />
       ))}
       
-      <h2 className="text-xl font-semibold my-4">All Contacts</h2>
+      <h2 className="text-xl font-semibold my-4">{t('all_contacts')}</h2>
       {contacts.filter(c => !c.isFavorite).map(contact => (
         <EmergencyContactCard 
           key={contact.id} 

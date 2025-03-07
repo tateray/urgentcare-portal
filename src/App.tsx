@@ -17,58 +17,61 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import FireEmergency from "./pages/FireEmergency";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/hospital-locator" element={<HospitalLocator />} />
-          <Route path="/emergency-contacts" element={<EmergencyContacts />} />
-          <Route path="/ambulance" element={<AmbulanceBooking />} />
-          <Route path="/fire-emergency" element={<FireEmergency />} />
-          <Route path="/auth" element={<Auth />} />
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/hospital-locator" element={<HospitalLocator />} />
+            <Route path="/emergency-contacts" element={<EmergencyContacts />} />
+            <Route path="/ambulance" element={<AmbulanceBooking />} />
+            <Route path="/fire-emergency" element={<FireEmergency />} />
+            <Route path="/auth" element={<Auth />} />
 
-          {/* Protected routes for logged in users */}
-          <Route path="/medical-history" element={
-            <ProtectedRoute>
-              <MedicalHistory />
-            </ProtectedRoute>
-          } />
-          <Route path="/chat" element={
-            <ProtectedRoute>
-              <ChatWithDoctor />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="/user-dashboard" element={
-            <ProtectedRoute>
-              <UserDashboard />
-            </ProtectedRoute>
-          } />
+            {/* Protected routes for logged in users */}
+            <Route path="/medical-history" element={
+              <ProtectedRoute>
+                <MedicalHistory />
+              </ProtectedRoute>
+            } />
+            <Route path="/chat" element={
+              <ProtectedRoute>
+                <ChatWithDoctor />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/user-dashboard" element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            } />
 
-          {/* Admin-only routes */}
-          <Route path="/admin" element={
-            <ProtectedRoute adminOnly>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
+            {/* Admin-only routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute adminOnly>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
 
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

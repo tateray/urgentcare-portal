@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AddEmergencyNumberProps {
   onAddContact: (contact: { name: string; phone: string; isDefault: boolean }) => void;
@@ -17,6 +18,7 @@ const AddEmergencyNumber: React.FC<AddEmergencyNumberProps> = ({ onAddContact })
   const [phone, setPhone] = useState('');
   const [isDefault, setIsDefault] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,12 +55,12 @@ const AddEmergencyNumber: React.FC<AddEmergencyNumberProps> = ({ onAddContact })
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
-          Add Emergency Number
+          {t('add_contact')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Emergency Contact</DialogTitle>
+          <DialogTitle>{t('add_new_contact')}</DialogTitle>
           <DialogDescription>
             Add a new emergency contact to your directory.
           </DialogDescription>
@@ -66,7 +68,7 @@ const AddEmergencyNumber: React.FC<AddEmergencyNumberProps> = ({ onAddContact })
         
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid w-full items-center gap-1.5">
-            <Label htmlFor="name">Service Name</Label>
+            <Label htmlFor="name">{t('contact_name')}</Label>
             <Input
               id="name"
               value={name}
@@ -76,7 +78,7 @@ const AddEmergencyNumber: React.FC<AddEmergencyNumberProps> = ({ onAddContact })
           </div>
           
           <div className="grid w-full items-center gap-1.5">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">{t('phone_number')}</Label>
             <Input
               id="phone"
               value={phone}
@@ -101,9 +103,9 @@ const AddEmergencyNumber: React.FC<AddEmergencyNumberProps> = ({ onAddContact })
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
-            <Button type="submit">Add Contact</Button>
+            <Button type="submit">{t('add_contact')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
