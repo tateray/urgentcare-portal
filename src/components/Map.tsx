@@ -1,101 +1,89 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { Button } from "@/components/ui/button";
-import { Download, Map as MapIcon, Layers } from "lucide-react";
+import { Download, Layers } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-// Temporary token input component
-const MapboxTokenInput = ({ onTokenSubmit }: { onTokenSubmit: (token: string) => void }) => {
-  const [token, setToken] = useState('');
-  
-  return (
-    <div className="p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800">
-      <h3 className="text-lg font-medium mb-4">Mapbox API Token Required</h3>
-      <p className="mb-4 text-sm text-muted-foreground">
-        To display the map, please enter your Mapbox public token. You can find this in your Mapbox account dashboard.
-      </p>
-      <div className="flex gap-2">
-        <input 
-          type="text" 
-          value={token} 
-          onChange={(e) => setToken(e.target.value)}
-          placeholder="Enter your Mapbox public token"
-          className="flex-1 px-3 py-2 border rounded-md"
-        />
-        <Button onClick={() => onTokenSubmit(token)}>
-          Submit
-        </Button>
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Your token will be stored in your browser's local storage.
-      </p>
-    </div>
-  );
-};
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string | null>(
-    localStorage.getItem('mapbox_token')
-  );
+  const map = useRef<maplibregl.Map | null>(null);
   const { toast } = useToast();
   const [isOfflineAvailable, setIsOfflineAvailable] = useState(false);
 
-  const handleTokenSubmit = (token: string) => {
-    localStorage.setItem('mapbox_token', token);
-    setMapboxToken(token);
-    toast({
-      title: "Token saved",
-      description: "Your Mapbox token has been saved",
-    });
-  };
-
   const handleSaveOffline = () => {
-    // In a real app, this would use the Mapbox Offline API
+    // In a real app, this would use a storage API
     // For this demo, we'll just simulate saving with a toast
     toast({
       title: "Map saved offline",
       description: "This area has been saved for offline use",
     });
     setIsOfflineAvailable(true);
+    localStorage.setItem('offline_map_data', 'true');
   };
 
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+    if (!mapContainer.current) return;
 
-    // Initialize map
-    mapboxgl.accessToken = mapboxToken;
-    
     try {
-      map.current = new mapboxgl.Map({
+      // Initialize map with OpenStreetMap
+      map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v11',
+        style: {
+          version: 8,
+          sources: {
+            'osm': {
+              type: 'raster',
+              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+              tileSize: 256,
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }
+          },
+          layers: [
+            {
+              id: 'osm-tiles',
+              type: 'raster',
+              source: 'osm',
+              minzoom: 0,
+              maxzoom: 19
+            }
+          ]
+        },
         center: [31.05, -17.83], // Zimbabwe coordinates
         zoom: 6,
       });
 
       // Add navigation controls
       map.current.addControl(
-        new mapboxgl.NavigationControl(),
+        new maplibregl.NavigationControl(),
         'top-right'
       );
 
       // Add hospitals markers (mock data for now)
-      // Fix: Explicitly type the lngLat as [number, number] tuples instead of number[]
       const hospitals = [
-        { lngLat: [31.04, -17.82] as [number, number], name: "Parirenyatwa Hospital" },
-        { lngLat: [31.05, -17.84] as [number, number], name: "Harare Central Hospital" },
-        { lngLat: [31.03, -17.83] as [number, number], name: "Avenues Clinic" }
+        { coordinates: [31.04, -17.82], name: "Parirenyatwa Hospital" },
+        { coordinates: [31.05, -17.84], name: "Harare Central Hospital" },
+        { coordinates: [31.03, -17.83], name: "Avenues Clinic" }
       ];
 
-      hospitals.forEach(hospital => {
-        const marker = new mapboxgl.Marker({ color: "#FF0000" })
-          .setLngLat(hospital.lngLat)
-          .setPopup(new mapboxgl.Popup().setHTML(`<h3>${hospital.name}</h3>`))
-          .addTo(map.current!);
+      // Wait for map to load before adding markers
+      map.current.on('load', () => {
+        hospitals.forEach(hospital => {
+          // Create a DOM element for the marker
+          const el = document.createElement('div');
+          el.className = 'marker';
+          el.style.backgroundImage = 'url(https://cdn-icons-png.flaticon.com/512/33/33777.png)';
+          el.style.width = '25px';
+          el.style.height = '25px';
+          el.style.backgroundSize = '100%';
+          
+          // Add marker to map
+          new maplibregl.Marker(el)
+            .setLngLat(hospital.coordinates as [number, number])
+            .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<h3>${hospital.name}</h3>`))
+            .addTo(map.current!);
+        });
       });
 
       // Check if we have cached data
@@ -106,7 +94,7 @@ const Map = () => {
       console.error("Error initializing map:", error);
       toast({
         title: "Map Error",
-        description: "There was an error loading the map. Please check your token.",
+        description: "There was an error loading the map.",
         variant: "destructive",
       });
     }
@@ -114,11 +102,7 @@ const Map = () => {
     return () => {
       map.current?.remove();
     };
-  }, [mapboxToken, toast]);
-
-  if (!mapboxToken) {
-    return <MapboxTokenInput onTokenSubmit={handleTokenSubmit} />;
-  }
+  }, [toast]);
 
   return (
     <div className="relative w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
@@ -144,6 +128,12 @@ const Map = () => {
           </Button>
         )}
       </div>
+
+      <style jsx>{`
+        .marker {
+          cursor: pointer;
+        }
+      `}</style>
     </div>
   );
 };
