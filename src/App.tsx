@@ -38,16 +38,12 @@ const App = () => (
             <Route path="/fire-emergency" element={<FireEmergency />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/ai-features" element={<AiFeatures />} />
+            <Route path="/chat" element={<ChatWithDoctor />} />
 
             {/* Protected routes for logged in users */}
             <Route path="/medical-history" element={
               <ProtectedRoute>
                 <MedicalHistory />
-              </ProtectedRoute>
-            } />
-            <Route path="/chat" element={
-              <ProtectedRoute>
-                <ChatWithDoctor />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={

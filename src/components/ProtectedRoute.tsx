@@ -38,7 +38,6 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
   }
 
   // For admin-only routes, check if user has admin role
-  // In a real app, this would check a claim or a database record
   if (adminOnly) {
     // This is a simplified check - in a real app, you'd check a claim or database
     const isAdmin = user.email?.includes('admin');
