@@ -9,7 +9,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,99 +18,63 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY');
     
     if (!supabaseKey) throw new Error('Missing Supabase key');
-
-    // Initialize Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Process notification request
     const { action, appointmentId, userId, message } = await req.json();
     
     switch (action) {
-      case 'create_appointment':
-        // Logic for creating a new appointment notification
-        const appointmentData = await supabase
+      case 'create_appointment': {
+        const { data: appointment, error } = await supabase
           .from('appointments')
           .select('*')
           .eq('id', appointmentId)
           .single();
         
-        if (appointmentData.error) throw appointmentData.error;
+        if (error) throw error;
         
         // Here you would typically send an email or SMS notification
         // For demo, we'll just update the appointment record
-        const updateResult = await supabase
+        const { error: updateError } = await supabase
           .from('appointments')
           .update({ notification_sent: true })
           .eq('id', appointmentId);
         
-        if (updateResult.error) throw updateResult.error;
+        if (updateError) throw updateError;
         
         return new Response(
-          JSON.stringify({ 
-            success: true, 
+          JSON.stringify({
+            success: true,
             message: "Appointment notification sent successfully",
-            appointmentId 
+            appointmentId
           }),
-          { 
-            headers: { 
-              ...corsHeaders,
-              "Content-Type": "application/json" 
-            } 
-          }
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
-        
-      case 'reminder':
-        // Logic for sending appointment reminders
-        // This would typically be triggered by a cron job
-        const reminderResult = await supabase
+      }
+      
+      case 'reminder': {
+        const { error: reminderError } = await supabase
           .from('appointments')
           .update({ notification_sent: true })
           .eq('id', appointmentId);
           
-        if (reminderResult.error) throw reminderResult.error;
+        if (reminderError) throw reminderError;
         
         return new Response(
-          JSON.stringify({ 
-            success: true, 
+          JSON.stringify({
+            success: true,
             message: "Appointment reminder sent successfully",
-            appointmentId 
+            appointmentId
           }),
-          { 
-            headers: { 
-              ...corsHeaders,
-              "Content-Type": "application/json" 
-            } 
-          }
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
-        
-      case 'reschedule':
-      case 'cancel':
-        // Logic for rescheduling or cancellation notifications
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: `Appointment ${action} notification sent`,
-            appointmentId 
-          }),
-          { 
-            headers: { 
-              ...corsHeaders,
-              "Content-Type": "application/json" 
-            } 
-          }
-        );
-        
+      }
+      
       default:
         return new Response(
-          JSON.stringify({ 
-            error: "Invalid notification action" 
-          }),
+          JSON.stringify({ error: "Invalid notification action" }),
           { 
             status: 400,
-            headers: { 
-              ...corsHeaders,
-              "Content-Type": "application/json" 
-            } 
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
           }
         );
     }
@@ -119,16 +82,13 @@ serve(async (req) => {
     console.error("Error processing notification request:", error);
     
     return new Response(
-      JSON.stringify({ 
-        error: "An error occurred while processing your notification request.",
-        details: error.message 
+      JSON.stringify({
+        error: "An error occurred while processing your notification request",
+        details: error.message
       }),
       { 
         status: 500,
-        headers: { 
-          ...corsHeaders,
-          "Content-Type": "application/json" 
-        } 
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     );
   }

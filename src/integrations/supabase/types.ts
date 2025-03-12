@@ -33,6 +33,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_chat_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_favorite: boolean | null
+          message: string
+          response: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          message: string
+          response: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          message?: string
+          response?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ambulance_bookings: {
         Row: {
           booking_time: string | null
@@ -106,6 +133,53 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "ambulance_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_date: string
+          created_at: string | null
+          doctor_name: string
+          hospital_id: number | null
+          id: string
+          notification_sent: boolean | null
+          specialty: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          created_at?: string | null
+          doctor_name: string
+          hospital_id?: number | null
+          id?: string
+          notification_sent?: boolean | null
+          specialty: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          created_at?: string | null
+          doctor_name?: string
+          hospital_id?: number | null
+          id?: string
+          notification_sent?: boolean | null
+          specialty?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
             referencedColumns: ["id"]
           },
         ]
@@ -221,6 +295,60 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_queue: {
+        Row: {
+          appointment_id: string
+          check_in_time: string | null
+          created_at: string | null
+          estimated_wait_time: number | null
+          hospital_id: number | null
+          id: string
+          position_in_queue: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          appointment_id: string
+          check_in_time?: string | null
+          created_at?: string | null
+          estimated_wait_time?: number | null
+          hospital_id?: number | null
+          id?: string
+          position_in_queue?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string
+          check_in_time?: string | null
+          created_at?: string | null
+          estimated_wait_time?: number | null
+          hospital_id?: number | null
+          id?: string
+          position_in_queue?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_queue_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_queue_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
             referencedColumns: ["id"]
           },
         ]
