@@ -129,13 +129,11 @@ const Map = () => {
         )}
       </div>
 
-      <style>
-        {`
-          .marker {
-            cursor: pointer;
-          }
-        `}
-      </style>
+      <style jsx>{`
+        .marker {
+          cursor: pointer;
+        }
+      `}</style>
     </div>
   );
 };
