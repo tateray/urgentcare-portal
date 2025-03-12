@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -29,7 +28,19 @@ const AiFeatures = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const featureParam = searchParams.get('feature');
   const [currentFeature, setCurrentFeature] = useState<string>("all");
+
+  useEffect(() => {
+    if (featureParam && ["search", "image", "recommendations", "analytics", "risk", "chat"].includes(featureParam)) {
+      setCurrentFeature(featureParam);
+      
+      if (featureParam === "chat") {
+        navigate("/chat");
+      }
+    }
+  }, [featureParam, navigate]);
 
   const handleRiskAssessmentComplete = (riskLevel: string, recommendation: string) => {
     toast({
@@ -37,7 +48,6 @@ const AiFeatures = () => {
       description: "Assessment completed successfully",
     });
     
-    // In a real app, this would save the assessment to the user's profile
     console.log("Risk assessment completed:", { riskLevel, recommendation });
   };
 
@@ -47,7 +57,6 @@ const AiFeatures = () => {
       description: `Navigating to hospital details...`,
     });
     
-    // In a real app, this would navigate to the hospital details page
     navigate(`/hospital-locator?id=${hospitalId}`);
   };
 

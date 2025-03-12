@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,8 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Map from "@/components/Map";
+import AiMedicalToolsWidget from "@/components/AiMedicalToolsWidget";
 
-// Emergency Services Components
 const EmergencyCard = ({ 
   title, 
   icon, 
@@ -75,7 +74,6 @@ const EmergencyCard = ({
   );
 };
 
-// Main Service Card for homepage
 const ServiceCard = ({ 
   title, 
   description, 
@@ -113,7 +111,6 @@ const Index = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [user, setUser] = useState<any>(null);
 
-  // Check if user is logged in
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -129,7 +126,6 @@ const Index = () => {
       description: `Searching for "${searchQuery}"...`,
     });
     
-    // This would be connected to a search API in a real app
     setSearchQuery("");
   };
   
@@ -288,6 +284,11 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
+        </section>
+        
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold mb-6 sf-pro-display">AI-Powered Medical Assistance</h2>
+          <AiMedicalToolsWidget />
         </section>
         
         <section className="mb-8">
@@ -481,3 +482,4 @@ const Index = () => {
 };
 
 export default Index;
+
