@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import FireEmergency from "./pages/FireEmergency";
+import AiFeatures from "./pages/AiFeatures";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/ambulance" element={<AmbulanceBooking />} />
             <Route path="/fire-emergency" element={<FireEmergency />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/ai-features" element={<AiFeatures />} />
 
             {/* Protected routes for logged in users */}
             <Route path="/medical-history" element={
