@@ -17,6 +17,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import FireEmergency from "./pages/FireEmergency";
 import AiFeatures from "./pages/AiFeatures";
+import AppointmentScheduling from "./pages/AppointmentScheduling";
+import QueueManagement from "./pages/QueueManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -54,6 +56,16 @@ const App = () => (
             <Route path="/user-dashboard" element={
               <ProtectedRoute>
                 <UserDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/appointments" element={
+              <ProtectedRoute>
+                <AppointmentScheduling />
+              </ProtectedRoute>
+            } />
+            <Route path="/queue" element={
+              <ProtectedRoute>
+                <QueueManagement />
               </ProtectedRoute>
             } />
 

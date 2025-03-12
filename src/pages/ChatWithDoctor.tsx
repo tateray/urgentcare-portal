@@ -6,110 +6,18 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Phone, User, Bot, Paperclip, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-
-// Enhanced AI responses with health context
-const aiResponses = [
-  {
-    keywords: ["headache", "head", "pain", "migraine"],
-    response: "I understand you're experiencing headaches. This could be due to several factors including stress, dehydration, or eye strain. If it's severe or persistent, please consult a healthcare professional. Would you like me to help you find a nearby hospital?",
-    followUp: "Have you taken any medication for your headache?"
-  },
-  {
-    keywords: ["fever", "temperature", "hot", "chills"],
-    response: "A fever is often a sign that your body is fighting an infection. It's important to stay hydrated and rest. If your temperature exceeds 39°C (102°F) or persists for more than two days, please seek medical attention.",
-    followUp: "Are you experiencing any other symptoms alongside the fever?"
-  },
-  {
-    keywords: ["cough", "chest", "breathing", "breath"],
-    response: "Coughing can be caused by various conditions ranging from a common cold to more serious respiratory infections. If you're experiencing difficulty breathing, chest pain, or coughing up blood, please seek immediate medical attention.",
-    followUp: "Is your cough dry or is it producing phlegm?"
-  },
-  {
-    keywords: ["medication", "medicine", "pill", "drug"],
-    response: "It's important to take medications as prescribed by your healthcare provider. If you're experiencing side effects or have concerns about your medication, consult with your doctor before making any changes to your regimen.",
-    followUp: "Are you currently taking any other medications that might interact with this one?"
-  },
-  {
-    keywords: ["hospital", "clinic", "doctor", "appointment"],
-    response: "I can help you find nearby healthcare facilities or schedule an appointment. Would you like me to show you hospitals near your location?",
-    followUp: "Is there a specific type of medical specialist you need to see?"
-  },
-  {
-    keywords: ["emergency", "urgent", "severe", "critical"],
-    response: "If you're experiencing a medical emergency, please call 999 immediately or go to your nearest emergency room. Don't wait for an online response in critical situations.",
-    followUp: "Is someone with you who can help or transport you to an emergency facility?"
-  }
-];
-
-// Default fallback responses
-const fallbackResponses = [
-  "I understand your concern. While I can provide general information, it's important to consult with a healthcare professional for personalized advice.",
-  "Based on what you've shared, this could be several things. It would be best to have this evaluated by a doctor, especially if the symptoms persist.",
-  "Make sure to stay hydrated and get plenty of rest. These general recommendations can help with many common illnesses.",
-  "If you're experiencing severe symptoms like difficulty breathing, chest pain, or severe headache, please seek emergency medical attention immediately.",
-  "It's important to take all medications as prescribed by your doctor, even if you start feeling better before finishing the course."
-];
-
-// Function to analyze user input and generate intelligent response
-const analyzeInput = (input: string) => {
-  // Convert input to lowercase for easier matching
-  const lowercaseInput = input.toLowerCase();
-  
-  // Check if input matches any of our trained responses
-  for (const item of aiResponses) {
-    if (item.keywords.some(keyword => lowercaseInput.includes(keyword))) {
-      return {
-        mainResponse: item.response,
-        followUp: item.followUp
-      };
-    }
-  }
-  
-  // If no match, return a random fallback response
-  const randomIndex = Math.floor(Math.random() * fallbackResponses.length);
-  return {
-    mainResponse: fallbackResponses[randomIndex],
-    followUp: "Is there anything specific about your symptoms that you'd like to share?"
-  };
-};
-
-// Health risk assessment based on keywords
-const assessHealthRisk = (conversation: string[]) => {
-  const lowercaseConvo = conversation.join(' ').toLowerCase();
-  
-  // Check for emergency keywords
-  const emergencyKeywords = ['cannot breathe', 'chest pain', 'unconscious', 'severe bleeding', 'stroke', 'heart attack'];
-  const hasEmergency = emergencyKeywords.some(keyword => lowercaseConvo.includes(keyword));
-  
-  if (hasEmergency) {
-    return {
-      level: 'high',
-      message: 'Your symptoms suggest a possible medical emergency. Please call emergency services (999) immediately.'
-    };
-  }
-  
-  // Check for urgent care keywords
-  const urgentKeywords = ['high fever', 'continuous vomiting', 'severe pain', 'dehydration'];
-  const needsUrgentCare = urgentKeywords.some(keyword => lowercaseConvo.includes(keyword));
-  
-  if (needsUrgentCare) {
-    return {
-      level: 'medium',
-      message: 'Your symptoms may require urgent medical attention. Consider visiting an urgent care facility soon.'
-    };
-  }
-  
-  return {
-    level: 'low',
-    message: 'Based on the information provided, your symptoms suggest routine care. Monitor your condition and consult a healthcare provider if symptoms worsen.'
-  };
-};
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: number;
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+}
+
+interface RiskAssessment {
+  level: 'low' | 'medium' | 'high';
+  message: string;
 }
 
 const ChatWithDoctor = () => {
@@ -125,7 +33,7 @@ const ChatWithDoctor = () => {
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
-  const [riskAssessment, setRiskAssessment] = useState<{level: string, message: string} | null>(null);
+  const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Auto-scroll to bottom of messages
@@ -133,7 +41,23 @@ const ChatWithDoctor = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  const handleSendMessage = () => {
+  const saveMessageToDatabase = async (message: string, response: string) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (userData?.user) {
+        await supabase.from('ai_chat_messages').insert({
+          user_id: userData.user.id,
+          message,
+          response
+        });
+      }
+    } catch (error) {
+      console.error("Error saving chat message:", error);
+    }
+  };
+  
+  const handleSendMessage = async () => {
     if (!input.trim()) return;
     
     // Add user message
@@ -147,52 +71,82 @@ const ChatWithDoctor = () => {
     setMessages(prevMessages => [...prevMessages, userMessage]);
     
     // Update conversation history for analysis
-    setConversationHistory(prev => [...prev, input]);
+    const updatedHistory = [...conversationHistory, input];
+    setConversationHistory(updatedHistory);
     
     setInput("");
     setIsTyping(true);
     
-    // Analyze the user input using AI
-    const response = analyzeInput(input);
-    
-    // Simulate bot response after a delay
-    setTimeout(() => {
+    try {
+      // Call the medical chatbot edge function
+      const { data, error } = await supabase.functions.invoke('medical-chatbot', {
+        body: {
+          message: input,
+          conversation: updatedHistory.join(' ')
+        }
+      });
+      
+      if (error) throw error;
+      
+      // Add main response from chatbot
       const botResponse: Message = {
         id: Date.now() + 1,
-        text: response.mainResponse,
+        text: data.mainResponse,
         sender: 'bot',
         timestamp: new Date()
       };
       
       setMessages(prevMessages => [...prevMessages, botResponse]);
-      setIsTyping(false);
       
-      // Add follow-up after a short delay
+      // Save message and response to database
+      await saveMessageToDatabase(input, data.mainResponse);
+      
+      // Set risk assessment if provided
+      if (data.risk) {
+        setRiskAssessment(data.risk);
+        
+        // Show toast for medium/high risk
+        if (data.risk.level !== 'low') {
+          toast({
+            title: "Health Risk Assessment",
+            description: data.risk.message,
+            variant: data.risk.level === 'high' ? 'destructive' : 'default',
+          });
+        }
+      }
+      
+      // After a short delay, add follow-up question
       setTimeout(() => {
         const followUpResponse: Message = {
           id: Date.now() + 2,
-          text: response.followUp,
+          text: data.followUp,
           sender: 'bot',
           timestamp: new Date()
         };
         setMessages(prevMessages => [...prevMessages, followUpResponse]);
-        
-        // Assess health risk after a few messages
-        if (conversationHistory.length >= 2) {
-          const assessment = assessHealthRisk([...conversationHistory, input]);
-          setRiskAssessment(assessment);
-          
-          // Show toast for medium/high risk
-          if (assessment.level !== 'low') {
-            toast({
-              title: "Health Risk Assessment",
-              description: assessment.message,
-              variant: assessment.level === 'high' ? 'destructive' : 'default',
-            });
-          }
-        }
-      }, 2000);
-    }, 1500);
+        setIsTyping(false);
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Error from chatbot:", error);
+      setIsTyping(false);
+      
+      // Add error message from bot
+      const errorMessage: Message = {
+        id: Date.now() + 1,
+        text: "I'm sorry, I'm having trouble processing your request. Please try again later.",
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      
+      setMessages(prevMessages => [...prevMessages, errorMessage]);
+      
+      toast({
+        title: "Error",
+        description: "Failed to get response from AI assistant",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleKeyPress = (e: React.KeyboardEvent) => {

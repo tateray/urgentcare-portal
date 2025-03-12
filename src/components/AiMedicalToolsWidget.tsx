@@ -11,8 +11,12 @@ import {
   Search,
   Microscope,
   Sparkles,
-  Heart
+  Heart,
+  Calendar,
+  Clock
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 // Define types for our AI tools
 interface AiTool {
@@ -21,9 +25,12 @@ interface AiTool {
   description: string;
   icon: React.ReactNode;
   path: string;
+  isNew?: boolean;
 }
 
 const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
+  const { toast } = useToast();
+
   // Define the available AI tools
   const aiTools: AiTool[] = [
     {
@@ -67,8 +74,42 @@ const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
       description: 'Predictive analytics for your health data',
       icon: <Microscope className="h-8 w-8 text-purple-500" />,
       path: '/ai-features?feature=analytics',
+    },
+    {
+      id: 'appointments',
+      title: 'Smart Scheduling',
+      description: 'AI-powered appointment scheduling system',
+      icon: <Calendar className="h-8 w-8 text-cyan-500" />,
+      path: '/ai-features?feature=appointments',
+      isNew: true,
+    },
+    {
+      id: 'queue',
+      title: 'Queue Management',
+      description: 'Real-time updates on wait times',
+      icon: <Clock className="h-8 w-8 text-indigo-500" />,
+      path: '/ai-features?feature=queue',
+      isNew: true,
     }
   ];
+
+  const handleToolClick = async (tool: AiTool) => {
+    // Track user interaction with AI tools
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (userData?.user) {
+        // Log tool usage for personalization
+        await supabase.from('ai_tool_interactions').insert({
+          user_id: userData.user.id,
+          tool_id: tool.id,
+          interaction_type: 'click'
+        }).select();
+      }
+    } catch (error) {
+      console.error("Error tracking AI tool interaction:", error);
+    }
+  };
 
   return (
     <Card className={className}>
@@ -84,8 +125,18 @@ const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {aiTools.map((tool) => (
-            <Link key={tool.id} to={tool.path} className="block">
-              <Card className="h-full hover:shadow-md transition-all hover:bg-muted border-none">
+            <Link 
+              key={tool.id} 
+              to={tool.path} 
+              className="block"
+              onClick={() => handleToolClick(tool)}
+            >
+              <Card className="h-full hover:shadow-md transition-all hover:bg-muted border-none relative">
+                {tool.isNew && (
+                  <span className="absolute top-1 right-1 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                    New
+                  </span>
+                )}
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <div className="mb-3 mt-2">
                     {tool.icon}
