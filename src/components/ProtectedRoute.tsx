@@ -15,14 +15,31 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
   const [user, setUser] = useState<any>(null);
   const location = useLocation();
 
+  // List of public AI feature paths that don't require authentication
+  const publicAiFeaturePaths = [
+    '/ai-features',
+    '/chat',
+  ];
+
+  // Check if current path is a public AI feature
+  const isPublicAiFeature = publicAiFeaturePaths.some(path => 
+    location.pathname.startsWith(path)
+  );
+
   useEffect(() => {
+    // If it's a public AI feature path, we don't need to check authentication
+    if (isPublicAiFeature) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isPublicAiFeature]);
 
   if (loading) {
     return (
@@ -32,6 +49,12 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
     );
   }
 
+  // If it's a public AI feature, allow access without authentication
+  if (isPublicAiFeature) {
+    return <>{children}</>;
+  }
+
+  // For other routes, check authentication
   if (!user) {
     // Redirect to login but save the location they tried to access
     return <Navigate to="/auth" state={{ from: location }} replace />;

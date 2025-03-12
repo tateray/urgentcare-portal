@@ -211,12 +211,12 @@ const AiFeatures = () => {
         </div>
       ) : (
         <>
-          {currentFeature === "search" && <IntelligentSearch onHospitalSelect={handleHospitalSelect} className="mb-6" />}
-          {currentFeature === "image" && <SymptomImageAnalyzer className="mb-6" />}
-          {currentFeature === "recommendations" && <PersonalizedRecommendations onHospitalSelect={handleHospitalSelect} className="mb-6" />}
-          {currentFeature === "analytics" && <PredictiveAnalytics className="mb-6" />}
+          {currentFeature === "search" && <IntelligentSearch onHospitalSelect={handleHospitalSelect} />}
+          {currentFeature === "image" && <SymptomImageAnalyzer />}
+          {currentFeature === "recommendations" && <PersonalizedRecommendations onHospitalSelect={handleHospitalSelect} />}
+          {currentFeature === "analytics" && <PredictiveAnalytics />}
           {currentFeature === "risk" && (
-            <div id="health-risk-section" className="mb-6">
+            <div id="health-risk-section">
               <HealthRiskAssessor onComplete={handleRiskAssessmentComplete} />
             </div>
           )}
