@@ -1,779 +1,433 @@
-
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useToast } from "@/components/ui/use-toast";
-import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { supabase } from "@/integrations/supabase/client";
-import { Activity, Heart, Footprints, Thermometer, Watch, Zap, Moon, BarChart3, Smartphone, ShieldAlert, Check, AlertCircle, Plus, RefreshCw, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Heart, 
+  Activity, 
+  Moon, 
+  Flame, 
+  Thermometer, 
+  Droplets, 
+  AlertCircle,
+  ArrowLeft,
+  Watch,
+  Smartphone,
+  Info
+} from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, BarChart, Bar } from 'recharts';
+import FloatingTopMenu from '@/components/FloatingTopMenu';
 
-interface HealthData {
-  steps: number;
-  heartRate: number;
-  sleepHours: number;
-  caloriesBurned: number;
-  temperature: number;
-  bloodOxygen: number;
-}
+// Mocked data for connected devices
+const mockConnectedDevices = [
+  { type: 'Smart Watch', name: 'Fitbit Sense', status: 'Connected', lastSync: '2024-07-15T14:30:00Z' },
+  { type: 'Blood Pressure Monitor', name: 'Omron Evolv', status: 'Connected', lastSync: '2024-07-15T14:00:00Z' },
+];
 
-interface DeviceInfo {
-  id: string;
-  name: string;
-  type: string;
-  provider: string;
-  connected: boolean;
-  lastSync: string;
-}
+// Mocked health data
+const mockHealthData = {
+  steps: 8500,
+  heartRate: 72,
+  sleepHours: 7.5,
+  caloriesBurned: 1850,
+  temperature: 36.7,
+  bloodOxygen: 97,
+};
 
-interface AIInsight {
-  type: string;
-  message: string;
-  severity: 'info' | 'warning' | 'critical';
-  icon?: React.ReactNode;
-  recommendations?: Array<{type: string, advice: string}>;
-}
+// Mocked AI insights
+const mockInsights = [
+  { type: 'Activity Level', message: 'Your activity level is slightly below average for your age group. Consider increasing daily steps.', severity: 'warning' },
+  { type: 'Sleep Quality', message: 'Your sleep duration is within the recommended range. Maintain a consistent sleep schedule.', severity: 'info' },
+  { type: 'Heart Rate', message: 'Your resting heart rate is normal. Continue with regular cardiovascular exercises.', severity: 'info' },
+];
 
 const WearablesIntegration = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [devices, setDevices] = useState<DeviceInfo[]>([]);
-  const [healthData, setHealthData] = useState<HealthData | null>(null);
-  const [insights, setInsights] = useState<AIInsight[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [connectingDevice, setConnectingDevice] = useState(false);
-  const [syncingData, setSyncingData] = useState(false);
-  const [addDeviceOpen, setAddDeviceOpen] = useState(false);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("devices");
-
-  // Check for authentication code in URL (for OAuth flow)
-  useEffect(() => {
-    const code = searchParams.get('code');
-    const provider = searchParams.get('provider');
-    
-    if (code && provider) {
-      toast({
-        title: "Authentication Successful",
-        description: `Connected to ${provider}. Fetching your health data...`,
-      });
-      
-      // In a real app, you would exchange this code for an access token
-      // and then use that token to fetch health data
-      setAccessToken(code);
-      
-      // Simulate successful connection
-      handleDeviceConnect(provider);
-      
-      // Remove the query parameters from the URL
-      navigate('/wearables', { replace: true });
-    }
-  }, [searchParams, navigate, toast]);
+  const [activeTab, setActiveTab] = useState('devices');
+  const [connectedDevices, setConnectedDevices] = useState<Array<{ type: string; name: string; status: string; lastSync: string }>>(mockConnectedDevices);
+  const [healthData, setHealthData] = useState<any>(mockHealthData);
+  const [insights, setInsights] = useState<Array<{ type: string; message: string; severity: 'info' | 'warning' | 'alert' }>>(mockInsights);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Simulate loading devices
+    // Simulate loading data
+    setIsLoading(true);
     setTimeout(() => {
-      setDevices([
-        {
-          id: 'dev-001',
-          name: 'Fitbit',
-          type: 'Smartwatch',
-          provider: 'fitbit',
-          connected: false,
-          lastSync: '-'
-        },
-        {
-          id: 'dev-002',
-          name: 'Apple Health',
-          type: 'Smartphone App',
-          provider: 'apple_health',
-          connected: false,
-          lastSync: '-'
-        },
-        {
-          id: 'dev-003',
-          name: 'Google Fit',
-          type: 'Fitness App',
-          provider: 'google_fit',
-          connected: false,
-          lastSync: '-'
-        },
-        {
-          id: 'dev-004',
-          name: 'Samsung Health',
-          type: 'Health App',
-          provider: 'samsung_health',
-          connected: false,
-          lastSync: '-'
-        }
-      ]);
-      setLoading(false);
+      setIsLoading(false);
     }, 1000);
   }, []);
 
-  // Connect to a device via API
-  const connectDevice = async (deviceId: string) => {
-    setConnectingDevice(true);
-    const device = devices.find(d => d.id === deviceId);
+  const connectDevice = (deviceType: string) => {
+    toast({
+      title: "Connecting Device",
+      description: `Attempting to connect to ${deviceType}...`,
+    });
     
-    if (!device) {
-      toast({
-        title: "Error",
-        description: "Device not found",
-        variant: "destructive",
-      });
-      setConnectingDevice(false);
-      return;
-    }
-    
-    try {
-      // Call our edge function to initiate the auth flow
-      const { data, error } = await supabase.functions.invoke('wearables-connect', {
-        body: {
-          provider: device.provider,
-          action: 'auth'
-        }
-      });
-      
-      if (error) throw error;
-      
-      if (data.authUrl) {
-        // For OAuth-based services, redirect to the auth URL
-        window.location.href = data.authUrl;
-      } else {
-        // For services that don't require OAuth (or use different auth mechanism)
-        handleDeviceConnect(device.provider);
-        setConnectingDevice(false);
-      }
-    } catch (error) {
-      console.error("Error connecting to device:", error);
-      toast({
-        title: "Connection Failed",
-        description: "There was an error connecting to your device",
-        variant: "destructive",
-      });
-      setConnectingDevice(false);
-    }
-  };
-
-  // Simulate device connection (in a real app, this would happen after OAuth)
-  const handleDeviceConnect = (provider: string) => {
-    setDevices(prevDevices => 
-      prevDevices.map(device => 
-        device.provider === provider 
-          ? { ...device, connected: true, lastSync: new Date().toLocaleString() } 
-          : device
-      )
-    );
-    
-    fetchHealthData(provider);
-    
-    // Move to data tab after connecting
+    // Simulate device connection
     setTimeout(() => {
-      setActiveTab("data");
-    }, 1000);
-  };
-
-  // Fetch health data from the connected device
-  const fetchHealthData = async (provider: string) => {
-    setSyncingData(true);
-    
-    try {
-      // In a real app, we'd use the actual access token
-      const token = accessToken || "demo-token-" + Math.random().toString(36).substring(7);
-      
-      // Call our edge function to fetch data
-      const { data, error } = await supabase.functions.invoke('wearables-connect', {
-        body: {
-          provider,
-          action: 'fetch_data',
-          accessToken: token,
-          userId: (await supabase.auth.getUser()).data.user?.id
+      setConnectedDevices(prevDevices => [
+        ...prevDevices,
+        {
+          type: deviceType,
+          name: `${deviceType} Device`,
+          status: 'Connected',
+          lastSync: new Date().toISOString(),
         }
-      });
+      ]);
       
-      if (error) throw error;
-      
-      setHealthData(data);
-      generateAIInsights(data);
-    } catch (error) {
-      console.error("Error fetching health data:", error);
       toast({
-        title: "Data Sync Failed",
-        description: "There was an error fetching your health data",
-        variant: "destructive",
+        title: "Device Connected",
+        description: `${deviceType} Device successfully connected!`,
       });
-    } finally {
-      setSyncingData(false);
-    }
+    }, 1500);
   };
 
-  // Disconnect from a device
-  const disconnectDevice = (deviceId: string) => {
-    setDevices(prevDevices => 
-      prevDevices.map(device => 
-        device.id === deviceId 
-          ? { ...device, connected: false, lastSync: '-' } 
-          : device
-      )
+  const disconnectDevice = (deviceName: string) => {
+    setConnectedDevices(prevDevices =>
+      prevDevices.filter(device => device.name !== deviceName)
     );
     
     toast({
       title: "Device Disconnected",
-      description: "Your device has been disconnected",
+      description: `${deviceName} successfully disconnected.`,
     });
-    
-    // If no devices are connected, clear health data
-    if (!devices.some(device => device.connected && device.id !== deviceId)) {
-      setHealthData(null);
-      setInsights([]);
-    }
   };
 
-  // Refresh data for a specific device
-  const refreshDeviceData = async (deviceId: string) => {
-    const device = devices.find(d => d.id === deviceId);
-    
-    if (!device || !device.connected) {
+  const syncData = () => {
+    setIsLoading(true);
+    toast({
+      title: "Syncing Data",
+      description: "Fetching latest health data from connected devices...",
+    });
+
+    // Simulate data synchronization
+    setTimeout(() => {
+      setHealthData({
+        steps: Math.floor(Math.random() * 10000),
+        heartRate: Math.floor(Math.random() * 40) + 60,
+        sleepHours: Math.floor(Math.random() * 4) + 5,
+        caloriesBurned: Math.floor(Math.random() * 2000),
+        temperature: 36.5 + Math.random() * 1.5,
+        bloodOxygen: 95 + Math.random() * 3,
+      });
+
+      setInsights([
+        {
+          type: 'Activity Level',
+          message: `You took ${healthData.steps} steps today. Keep up the good work!`,
+          severity: 'info',
+        },
+        {
+          type: 'Sleep Quality',
+          message: `You slept for ${healthData.sleepHours.toFixed(1)} hours. Aim for 7-9 hours for optimal health.`,
+          severity: 'warning',
+        },
+      ]);
+      
+      setIsLoading(false);
       toast({
-        title: "Error",
-        description: "Device not connected",
-        variant: "destructive",
+        title: "Data Synced",
+        description: "Successfully synced health data from connected devices.",
       });
-      return;
-    }
-    
-    setRefreshing(deviceId);
-    
-    try {
-      await fetchHealthData(device.provider);
-      
-      // Update last sync time
-      setDevices(prevDevices => 
-        prevDevices.map(d => 
-          d.id === deviceId 
-            ? { ...d, lastSync: new Date().toLocaleString() } 
-            : d
-        )
-      );
-      
-      toast({
-        title: "Data Refreshed",
-        description: "Your health data has been updated",
-      });
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-      toast({
-        title: "Refresh Failed",
-        description: "There was an error refreshing your health data",
-        variant: "destructive",
-      });
-    } finally {
-      setRefreshing(null);
-    }
-  };
-
-  // Generate AI insights based on health data
-  const generateAIInsights = async (data: HealthData) => {
-    try {
-      const { data: insightsData, error } = await supabase.functions.invoke('wearables-insights', {
-        body: {
-          healthData: data,
-          userId: (await supabase.auth.getUser()).data.user?.id,
-          userProfile: {
-            // In a real app, you'd fetch this from the user's profile
-            age: 35,
-            gender: 'unknown',
-            conditions: []
-          }
-        }
-      });
-      
-      if (error) throw error;
-      
-      // Add icons to the insights
-      const insightsWithIcons = insightsData.insights.map(insight => ({
-        ...insight,
-        icon: getInsightIcon(insight.type, insight.severity)
-      }));
-      
-      setInsights(insightsWithIcons);
-      
-      // Move to insights tab after analysis
-      setTimeout(() => {
-        setActiveTab("insights");
-      }, 500);
-    } catch (error) {
-      console.error("Error generating insights:", error);
-      toast({
-        title: "Analysis Failed",
-        description: "There was an error analyzing your health data",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Get icon for insight type
-  const getInsightIcon = (type: string, severity: string) => {
-    const color = severity === 'critical' ? "text-red-500" : 
-                 severity === 'warning' ? "text-amber-500" : 
-                 "text-green-500";
-                 
-    switch (type.toLowerCase()) {
-      case 'steps':
-        return <Footprints className={`h-5 w-5 ${color}`} />;
-      case 'heart rate':
-        return <Heart className={`h-5 w-5 ${color}`} />;
-      case 'sleep':
-        return <Moon className={`h-5 w-5 ${color}`} />;
-      case 'blood oxygen':
-        return <Activity className={`h-5 w-5 ${color}`} />;
-      case 'temperature':
-        return <Thermometer className={`h-5 w-5 ${color}`} />;
-      case 'ai health coach':
-        return <Zap className={`h-5 w-5 text-purple-500`} />;
-      case 'urgent health alert':
-        return <ShieldAlert className={`h-5 w-5 text-red-500`} />;
-      default:
-        return <AlertCircle className={`h-5 w-5 ${color}`} />;
-    }
-  };
-
-  // Get progress color based on value and thresholds
-  const getProgressColor = (value: number, min: number, target: number, max: number) => {
-    if (value < min) return "bg-red-500";
-    if (value > max) return "bg-amber-500";
-    if (value >= target) return "bg-green-500";
-    return "bg-blue-500";
-  };
-
-  // Calculate progress percentage
-  const calculateProgress = (value: number, min: number, target: number) => {
-    // Ensure we don't exceed 100%
-    return Math.min(Math.round((value / target) * 100), 100);
+    }, 2000);
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-2">Smart Devices & Wearables</h1>
-      <p className="text-muted-foreground mb-6">Connect your wearable devices to get AI-powered health insights</p>
+    <div className="min-h-screen bg-background pb-10">
+      <FloatingTopMenu />
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="devices">
-            <Watch className="h-4 w-4 mr-2" />
-            Devices
-          </TabsTrigger>
-          <TabsTrigger value="data" disabled={!healthData}>
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Health Data
-          </TabsTrigger>
-          <TabsTrigger value="insights" disabled={insights.length === 0}>
-            <Zap className="h-4 w-4 mr-2" />
-            AI Insights
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="devices" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Connect Your Devices</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setAddDeviceOpen(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Device
-                </Button>
-              </CardTitle>
-              <CardDescription>
-                Link your wearables and smart devices to get personalized health insights
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center p-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {devices.map((device) => (
-                    <Card key={device.id} className="border-muted">
-                      <CardContent className="p-4 flex justify-between items-center">
-                        <div className="flex items-center">
-                          {device.type.includes('watch') ? (
-                            <Watch className="h-8 w-8 mr-3 text-primary" />
-                          ) : (
-                            <Smartphone className="h-8 w-8 mr-3 text-primary" />
-                          )}
-                          <div>
-                            <h3 className="font-medium">{device.name}</h3>
-                            <p className="text-sm text-muted-foreground">{device.type}</p>
-                            {device.connected && (
-                              <div className="flex items-center mt-1">
-                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 flex items-center">
-                                  <Check className="h-3 w-3 mr-1" /> Connected
-                                </Badge>
-                                <span className="text-xs text-muted-foreground ml-2">
-                                  Last sync: {device.lastSync}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {device.connected && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => refreshDeviceData(device.id)}
-                              disabled={!!refreshing}
-                            >
-                              {refreshing === device.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <RefreshCw className="h-4 w-4" />
-                              )}
-                            </Button>
-                          )}
-                          {device.connected ? (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => disconnectDevice(device.id)}
-                            >
-                              Disconnect
-                            </Button>
-                          ) : (
-                            <Button 
-                              size="sm"
-                              onClick={() => connectDevice(device.id)}
-                              disabled={connectingDevice}
-                            >
-                              {connectingDevice ? "Connecting..." : "Connect"}
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  
-                  {devices.length === 0 && (
-                    <div className="text-center p-8">
-                      <p className="text-muted-foreground">No devices available</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => setAddDeviceOpen(true)}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add a Device
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="flex justify-center border-t pt-4">
-              <Button variant="outline" onClick={() => toast({ title: "Scanning...", description: "Looking for new devices nearby." })}>
-                Scan for New Devices
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="data" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Health Data</CardTitle>
-              <CardDescription>
-                Data synced from your connected devices
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {healthData ? (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <Card className="border-muted">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col items-center justify-center">
-                          <Footprints className="h-8 w-8 mb-2 text-blue-500" />
-                          <p className="text-2xl font-bold">{healthData.steps}</p>
-                          <p className="text-sm text-muted-foreground">Steps</p>
-                          
-                          <div className="w-full mt-4">
-                            <Progress 
-                              value={calculateProgress(healthData.steps, 0, 10000)} 
-                              className={getProgressColor(healthData.steps, 3000, 10000, 20000)}
-                            />
-                            <p className="text-xs text-right mt-1 text-muted-foreground">Goal: 10,000</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="border-muted">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col items-center justify-center">
-                          <Heart className="h-8 w-8 mb-2 text-red-500" />
-                          <p className="text-2xl font-bold">{healthData.heartRate}</p>
-                          <p className="text-sm text-muted-foreground">Heart Rate (bpm)</p>
-                          
-                          <div className="w-full mt-4">
-                            <Progress 
-                              value={calculateProgress(healthData.heartRate, 0, 80)} 
-                              className={getProgressColor(healthData.heartRate, 50, 70, 100)}
-                            />
-                            <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                              <span>Low</span>
-                              <span>Normal</span>
-                              <span>High</span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="border-muted">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col items-center justify-center">
-                          <Moon className="h-8 w-8 mb-2 text-purple-500" />
-                          <p className="text-2xl font-bold">{healthData.sleepHours}</p>
-                          <p className="text-sm text-muted-foreground">Sleep (hours)</p>
-                          
-                          <div className="w-full mt-4">
-                            <Progress 
-                              value={calculateProgress(healthData.sleepHours, 0, 8)} 
-                              className={getProgressColor(healthData.sleepHours, 5, 8, 10)}
-                            />
-                            <p className="text-xs text-right mt-1 text-muted-foreground">Goal: 8 hours</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="border-muted">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col items-center justify-center">
-                          <Activity className="h-8 w-8 mb-2 text-orange-500" />
-                          <p className="text-2xl font-bold">{healthData.caloriesBurned}</p>
-                          <p className="text-sm text-muted-foreground">Calories Burned</p>
-                          
-                          <div className="w-full mt-4">
-                            <Progress 
-                              value={calculateProgress(healthData.caloriesBurned, 0, 2000)} 
-                              className={getProgressColor(healthData.caloriesBurned, 800, 2000, 3500)}
-                            />
-                            <p className="text-xs text-right mt-1 text-muted-foreground">Est. Goal: 2,000</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="border-muted">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col items-center justify-center">
-                          <Thermometer className="h-8 w-8 mb-2 text-amber-500" />
-                          <p className="text-2xl font-bold">{healthData.temperature}°C</p>
-                          <p className="text-sm text-muted-foreground">Temperature</p>
-                          
-                          <div className="w-full mt-4">
-                            <Progress 
-                              value={50} 
-                              className={getProgressColor(healthData.temperature, 35, 36.5, 38)}
-                            />
-                            <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                              <span>35°C</span>
-                              <span>37°C</span>
-                              <span>39°C</span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="border-muted">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col items-center justify-center">
-                          <Zap className="h-8 w-8 mb-2 text-sky-500" />
-                          <p className="text-2xl font-bold">{healthData.bloodOxygen}%</p>
-                          <p className="text-sm text-muted-foreground">Blood Oxygen</p>
-                          
-                          <div className="w-full mt-4">
-                            <Progress 
-                              value={calculateProgress(healthData.bloodOxygen, 0, 95)} 
-                              className={getProgressColor(healthData.bloodOxygen, 94, 98, 101)}
-                            />
-                            <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                              <span>90%</span>
-                              <span>95%</span>
-                              <span>100%</span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                  <div className="flex justify-center">
-                    <Button 
-                      onClick={() => generateAIInsights(healthData)}
-                      disabled={syncingData}
-                    >
-                      {syncingData ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="h-4 w-4 mr-2" />
-                          Analyze My Data
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center p-8">
-                  <p className="text-muted-foreground">No health data available. Please connect a device first.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="insights" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Health Insights</CardTitle>
-              <CardDescription>
-                Personalized insights and recommendations based on your health data
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {insights.map((insight, index) => (
-                  <Alert 
-                    key={index} 
-                    variant={insight.severity === 'critical' ? 'destructive' : 'default'}
-                    className={insight.severity === 'warning' ? 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100' : ''}
-                  >
-                    <div className="flex items-start">
-                      {insight.icon}
-                      <div className="ml-3">
-                        <AlertTitle>{insight.type}</AlertTitle>
-                        <AlertDescription>
-                          {insight.message}
-                          
-                          {insight.recommendations && (
-                            <ul className="mt-2 space-y-2">
-                              {insight.recommendations.map((rec, idx) => (
-                                <li key={idx} className="pl-2 border-l-2 border-muted-foreground/30">
-                                  {rec.advice}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </AlertDescription>
-                      </div>
-                    </div>
-                  </Alert>
-                ))}
-                
-                {insights.length === 0 && (
-                  <div className="text-center p-8">
-                    <p className="text-muted-foreground">No insights available. Please analyze your health data first.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-            <CardFooter className="flex-col space-y-4 border-t pt-4">
-              <div className="text-center w-full">
-                <p className="text-sm text-muted-foreground mb-2">Need more detailed analysis?</p>
-                <Button>Schedule a Telehealth Consultation</Button>
-              </div>
-              <Separator />
-              <p className="text-xs text-muted-foreground text-center w-full mt-2">
-                These insights are generated by AI and should not replace professional medical advice.
-                Always consult a healthcare provider for medical concerns.
-              </p>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      {/* Dialog for adding new devices */}
-      <Dialog open={addDeviceOpen} onOpenChange={setAddDeviceOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add a New Device</DialogTitle>
-            <DialogDescription>
-              Connect a new wearable device or health app to track your metrics
-            </DialogDescription>
-          </DialogHeader>
+      <header className="bg-background border-b p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate(-1)} 
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-semibold">Wearables & Health Devices</h1>
+        </div>
+      </header>
+
+      <main className="container mx-auto py-6 px-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-3 w-full mb-6">
+            <TabsTrigger value="devices">Devices</TabsTrigger>
+            <TabsTrigger value="health-data">Health Data</TabsTrigger>
+            <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
+          </TabsList>
           
-          <div className="grid gap-4 py-4">
-            <p className="text-sm text-muted-foreground">
-              Select your device type to begin the connection process:
-            </p>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <Button 
-                variant="outline" 
-                className="h-24 flex flex-col justify-center items-center"
-                onClick={() => {
-                  setAddDeviceOpen(false);
-                  toast({
-                    title: "Feature in Development",
-                    description: "Support for additional devices is coming soon.",
-                  });
-                }}
-              >
-                <Watch className="h-8 w-8 mb-2 text-primary" />
-                <span>Smartwatch</span>
-              </Button>
+          <TabsContent value="devices" className="animate-fade-in">
+            <div className="space-y-4">
+              {connectedDevices.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Smartphone className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">No Devices Connected</h3>
+                    <p className="text-muted-foreground mb-4">Connect your smart devices to track your health data</p>
+                    <Button onClick={() => connectDevice('Generic Device')}>Connect Device</Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                connectedDevices.map((device, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <CardTitle>{device.name}</CardTitle>
+                      <CardDescription>{device.type}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p>Status: {device.status}</p>
+                      <p>Last Sync: {new Date(device.lastSync).toLocaleString()}</p>
+                    </CardContent>
+                    <CardFooter className="justify-end">
+                      <Button 
+                        variant="destructive"
+                        onClick={() => disconnectDevice(device.name)}
+                      >
+                        Disconnect
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              )}
               
               <Button 
-                variant="outline"
-                className="h-24 flex flex-col justify-center items-center"
-                onClick={() => {
-                  setAddDeviceOpen(false);
-                  toast({
-                    title: "Feature in Development",
-                    description: "Support for additional devices is coming soon.",
-                  });
-                }}
+                variant="secondary"
+                className="w-full"
+                onClick={() => connectDevice('Generic Device')}
               >
-                <Smartphone className="h-8 w-8 mb-2 text-primary" />
-                <span>Smartphone</span>
+                Connect New Device
               </Button>
             </div>
-            
-            <p className="text-xs text-muted-foreground mt-2">
-              For best results, make sure your device has the latest firmware and is properly charged.
-            </p>
-          </div>
+          </TabsContent>
           
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setAddDeviceOpen(false)}
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <TabsContent value="health-data" className="animate-fade-in">
+            <div className="space-y-6">
+              {!healthData ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Info className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">No Health Data Available</h3>
+                    <p className="text-muted-foreground mb-4">Connect a device first to view your health metrics</p>
+                    <Button onClick={() => setActiveTab('devices')}>Connect a Device</Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-primary" />
+                          Steps
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold">{healthData.steps.toLocaleString()}</div>
+                        <Progress value={(healthData.steps / 10000) * 100} className="mt-2" />
+                        <p className="text-xs text-muted-foreground mt-1">Goal: 10,000 steps</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center gap-2">
+                          <Heart className="h-5 w-5 text-red-500" />
+                          Heart Rate
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold">{healthData.heartRate} <span className="text-base font-normal">bpm</span></div>
+                        <Progress 
+                          value={((healthData.heartRate - 40) / 140) * 100} 
+                          className={`mt-2 ${healthData.heartRate > 100 ? 'bg-red-200' : ''}`} 
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">Resting: 60-100 bpm</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center gap-2">
+                          <Moon className="h-5 w-5 text-indigo-400" />
+                          Sleep
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold">{healthData.sleepHours} <span className="text-base font-normal">hours</span></div>
+                        <Progress 
+                          value={(healthData.sleepHours / 9) * 100} 
+                          className={`mt-2 ${healthData.sleepHours < 6 ? 'bg-amber-200' : ''}`} 
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">Recommended: 7-9 hours</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Steps History</CardTitle>
+                      </CardHeader>
+                      <CardContent className="h-80">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart 
+                            data={[
+                              { day: 'Mon', steps: Math.floor(Math.random() * 3000) + 5000 },
+                              { day: 'Tue', steps: Math.floor(Math.random() * 3000) + 5000 },
+                              { day: 'Wed', steps: Math.floor(Math.random() * 3000) + 5000 },
+                              { day: 'Thu', steps: Math.floor(Math.random() * 3000) + 5000 },
+                              { day: 'Fri', steps: Math.floor(Math.random() * 3000) + 5000 },
+                              { day: 'Sat', steps: healthData.steps - 500 },
+                              { day: 'Sun', steps: healthData.steps },
+                            ]}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="day" />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar dataKey="steps" fill="#3b82f6" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Heart Rate Trends</CardTitle>
+                      </CardHeader>
+                      <CardContent className="h-80">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart
+                            data={[
+                              { time: '6am', rate: Math.floor(Math.random() * 15) + 60 },
+                              { time: '9am', rate: Math.floor(Math.random() * 15) + 65 },
+                              { time: '12pm', rate: Math.floor(Math.random() * 15) + 70 },
+                              { time: '3pm', rate: Math.floor(Math.random() * 15) + 75 },
+                              { time: '6pm', rate: Math.floor(Math.random() * 15) + 75 },
+                              { time: '9pm', rate: Math.floor(Math.random() * 10) + 65 },
+                              { time: 'Now', rate: healthData.heartRate },
+                            ]}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="time" />
+                            <YAxis domain={[40, 180]} />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="rate" stroke="#ef4444" strokeWidth={2} dot={{ r: 4 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="ai-insights" className="animate-fade-in">
+            <div className="space-y-6">
+              {!insights.length ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Info className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-xl font-semibold mb-2">No AI Insights Available</h3>
+                    <p className="text-muted-foreground mb-4">Connect a device and sync health data to receive AI-powered insights</p>
+                    <Button onClick={() => setActiveTab('devices')}>Connect a Device</Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>AI Health Analysis</CardTitle>
+                      <CardDescription>
+                        Personalized insights based on your health data
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {insights.map((insight, index) => (
+                          <div 
+                            key={index}
+                            className={`p-4 rounded-lg border ${
+                              insight.severity === 'alert' ? 'bg-red-50 border-red-200' :
+                              insight.severity === 'warning' ? 'bg-amber-50 border-amber-200' :
+                              'bg-blue-50 border-blue-200'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              {insight.severity === 'alert' ? (
+                                <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                              ) : insight.severity === 'warning' ? (
+                                <Info className="h-5 w-5 text-amber-500 mt-0.5" />
+                              ) : (
+                                <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+                              )}
+                              <div>
+                                <h4 className={`font-medium ${
+                                  insight.severity === 'alert' ? 'text-red-700' :
+                                  insight.severity === 'warning' ? 'text-amber-700' :
+                                  'text-blue-700'
+                                }`}>
+                                  {insight.type}
+                                </h4>
+                                <p className="mt-1 text-sm">{insight.message}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          toast({
+                            title: "AI Analysis",
+                            description: "A comprehensive health report has been generated",
+                          });
+                        }}
+                      >
+                        Generate Detailed Health Report
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Daily Recommendations</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+                          <h4 className="font-medium text-green-700">Exercise Suggestion</h4>
+                          <p className="mt-1 text-sm">Based on your activity levels, a 30-minute moderate walk would help you reach your step goal for today.</p>
+                        </div>
+                        
+                        <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+                          <h4 className="font-medium text-indigo-700">Sleep Recommendation</h4>
+                          <p className="mt-1 text-sm">Try to sleep 30 minutes earlier tonight to improve your overall sleep quality and duration.</p>
+                        </div>
+                        
+                        <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                          <h4 className="font-medium text-blue-700">Hydration Reminder</h4>
+                          <p className="mt-1 text-sm">Remember to drink at least 8 glasses of water today, especially if you plan to exercise.</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 };

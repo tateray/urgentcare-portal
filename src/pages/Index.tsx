@@ -25,6 +25,7 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Map from "@/components/Map";
 import AiMedicalToolsWidget from "@/components/AiMedicalToolsWidget";
+import FloatingTopMenu from "@/components/FloatingTopMenu";
 
 const EmergencyCard = ({ 
   title, 
@@ -147,6 +148,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <FloatingTopMenu />
+      
       <header className="apple-nav py-4 px-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -482,4 +485,3 @@ const Index = () => {
 };
 
 export default Index;
-
