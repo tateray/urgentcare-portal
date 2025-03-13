@@ -13,7 +13,8 @@ import {
   Sparkles,
   Heart,
   Calendar,
-  Clock
+  Clock,
+  Watch
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -81,14 +82,20 @@ const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
       description: 'AI-powered appointment scheduling system',
       icon: <Calendar className="h-8 w-8 text-cyan-500" />,
       path: '/ai-features?feature=appointments',
-      isNew: true,
     },
     {
       id: 'queue',
       title: 'Queue Management',
       description: 'Real-time updates on wait times',
       icon: <Clock className="h-8 w-8 text-indigo-500" />,
-      path: '/ai-features?feature=queue',
+      path: '/queue',
+    },
+    {
+      id: 'wearables',
+      title: 'Smart Devices',
+      description: 'Connect your wearables for AI health insights',
+      icon: <Watch className="h-8 w-8 text-emerald-500" />,
+      path: '/wearables',
       isNew: true,
     }
   ];
@@ -99,11 +106,11 @@ const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
       const { data: userData } = await supabase.auth.getUser();
       
       if (userData?.user) {
-        // Log tool usage for personalization
-        await supabase.from('ai_tool_interactions').insert({
+        // Log tool usage in chat messages instead
+        await supabase.from('ai_chat_messages').insert({
           user_id: userData.user.id,
-          tool_id: tool.id,
-          interaction_type: 'click'
+          message: `Accessed ${tool.title} tool`,
+          response: `Tool interaction recorded: ${tool.id}`
         }).select();
       }
     } catch (error) {

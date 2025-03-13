@@ -20,6 +20,7 @@ import FireEmergency from "./pages/FireEmergency";
 import AiFeatures from "./pages/AiFeatures";
 import AppointmentScheduling from "./pages/AppointmentScheduling";
 import QueueManagement from "./pages/QueueManagement";
+import WearablesIntegration from "./pages/WearablesIntegration";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/ai-features" element={<AiFeatures />} />
             <Route path="/chat" element={<ChatWithDoctor />} />
+            <Route path="/wearables" element={<WearablesIntegration />} />
 
             {/* Protected routes for logged in users */}
             <Route path="/medical-history" element={

@@ -45,7 +45,19 @@ const QueueManagement = () => {
         .order('position_in_queue', { ascending: true });
 
       if (error) throw error;
-      setQueueEntries(entries || []);
+      
+      // Transform data to match our QueueEntry interface
+      const formattedEntries = entries?.map(entry => ({
+        id: entry.id,
+        position_in_queue: entry.position_in_queue || 0,
+        estimated_wait_time: entry.estimated_wait_time || 0,
+        status: entry.status || 'waiting',
+        doctor_name: entry.appointments?.doctor_name || 'Unknown',
+        specialty: entry.appointments?.specialty || 'General',
+        check_in_time: entry.check_in_time || new Date().toISOString()
+      })) || [];
+      
+      setQueueEntries(formattedEntries);
     } catch (error) {
       console.error('Error fetching queue entries:', error);
       toast({
