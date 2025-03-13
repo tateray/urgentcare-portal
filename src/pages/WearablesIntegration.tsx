@@ -39,10 +39,21 @@ const mockHealthData = {
 
 // Mocked AI insights
 const mockInsights = [
-  { type: 'Activity Level', message: 'Your activity level is slightly below average for your age group. Consider increasing daily steps.', severity: 'warning' },
-  { type: 'Sleep Quality', message: 'Your sleep duration is within the recommended range. Maintain a consistent sleep schedule.', severity: 'info' },
-  { type: 'Heart Rate', message: 'Your resting heart rate is normal. Continue with regular cardiovascular exercises.', severity: 'info' },
+  { type: 'Activity Level', message: 'Your activity level is slightly below average for your age group. Consider increasing daily steps.', severity: 'warning' as const },
+  { type: 'Sleep Quality', message: 'Your sleep duration is within the recommended range. Maintain a consistent sleep schedule.', severity: 'info' as const },
+  { type: 'Heart Rate', message: 'Your resting heart rate is normal. Continue with regular cardiovascular exercises.', severity: 'info' as const },
 ];
+
+// Type for the insight severity
+type InsightSeverity = 'warning' | 'info' | 'alert';
+
+// Type for the insights
+interface Insight {
+  type: string;
+  message: string;
+  severity: InsightSeverity;
+  recommendations?: Array<{type: string, advice: string}>;
+}
 
 const WearablesIntegration = () => {
   const { toast } = useToast();
@@ -50,7 +61,7 @@ const WearablesIntegration = () => {
   const [activeTab, setActiveTab] = useState('devices');
   const [connectedDevices, setConnectedDevices] = useState<Array<{ type: string; name: string; status: string; lastSync: string }>>(mockConnectedDevices);
   const [healthData, setHealthData] = useState<any>(mockHealthData);
-  const [insights, setInsights] = useState<Array<{ type: string; message: string; severity: 'info' | 'warning' | 'alert' }>>(mockInsights);
+  const [insights, setInsights] = useState<Insight[]>(mockInsights);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -106,25 +117,37 @@ const WearablesIntegration = () => {
 
     // Simulate data synchronization
     setTimeout(() => {
-      setHealthData({
+      const newHealthData = {
         steps: Math.floor(Math.random() * 10000),
         heartRate: Math.floor(Math.random() * 40) + 60,
         sleepHours: Math.floor(Math.random() * 4) + 5,
         caloriesBurned: Math.floor(Math.random() * 2000),
         temperature: 36.5 + Math.random() * 1.5,
         bloodOxygen: 95 + Math.random() * 3,
-      });
+      };
 
+      setHealthData(newHealthData);
+
+      // Ensure the severity is always one of the allowed types
+      const validateSeverity = (severity: string): InsightSeverity => {
+        if (severity === 'warning' || severity === 'info' || severity === 'alert') {
+          return severity;
+        }
+        // Default to 'info' for any other value
+        return 'info';
+      };
+
+      // Update insights with the correct type for severity
       setInsights([
         {
           type: 'Activity Level',
-          message: `You took ${healthData.steps} steps today. Keep up the good work!`,
-          severity: 'info',
+          message: `You took ${newHealthData.steps} steps today. Keep up the good work!`,
+          severity: validateSeverity('info'),
         },
         {
           type: 'Sleep Quality',
-          message: `You slept for ${healthData.sleepHours.toFixed(1)} hours. Aim for 7-9 hours for optimal health.`,
-          severity: 'warning',
+          message: `You slept for ${newHealthData.sleepHours.toFixed(1)} hours. Aim for 7-9 hours for optimal health.`,
+          severity: validateSeverity('warning'),
         },
       ]);
       
@@ -377,6 +400,15 @@ const WearablesIntegration = () => {
                                   {insight.type}
                                 </h4>
                                 <p className="mt-1 text-sm">{insight.message}</p>
+                                {insight.recommendations && (
+                                  <div className="mt-2">
+                                    {insight.recommendations.map((rec, idx) => (
+                                      <div key={idx} className="mt-2 text-sm">
+                                        <strong>{rec.type}:</strong> {rec.advice}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
