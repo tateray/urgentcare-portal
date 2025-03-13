@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Settings, 
   Moon, 
@@ -7,7 +7,10 @@ import {
   Globe, 
   ZoomIn, 
   Type, 
-  Palette 
+  Palette,
+  Check,
+  X,
+  Languages
 } from "lucide-react";
 import {
   Sheet,
@@ -30,20 +33,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const SettingsMenu = () => {
+  const { toast } = useToast();
+  const { language: currentLanguage, setLanguage: setContextLanguage } = useLanguage();
+  
+  // Local state for settings (to be applied only when saved)
   const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [isLargeText, setIsLargeText] = useState(false);
   const [isReduceMotion, setIsReduceMotion] = useState(false);
-  const [language, setLanguage] = useState("en");
-
-  const toggleTheme = (newTheme: "light" | "dark" | "system") => {
-    setTheme(newTheme);
+  const [language, setLanguage] = useState(currentLanguage);
+  const [region, setRegion] = useState("zw");
+  
+  // Initialize theme state from document
+  useEffect(() => {
+    if (document.documentElement.classList.contains("dark")) {
+      setTheme("dark");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme("system");
+    } else {
+      setTheme("light");
+    }
     
-    if (newTheme === "dark") {
+    // Initialize accessibility states from document
+    setIsHighContrast(document.documentElement.classList.contains("high-contrast"));
+    setIsLargeText(document.documentElement.classList.contains("large-text"));
+    setIsReduceMotion(document.documentElement.classList.contains("reduce-motion"));
+  }, []);
+  
+  // Reset local settings to current applied settings
+  const resetLocalSettings = () => {
+    if (document.documentElement.classList.contains("dark")) {
+      setTheme("dark");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme("system");
+    } else {
+      setTheme("light");
+    }
+    
+    setIsHighContrast(document.documentElement.classList.contains("high-contrast"));
+    setIsLargeText(document.documentElement.classList.contains("large-text"));
+    setIsReduceMotion(document.documentElement.classList.contains("reduce-motion"));
+    setLanguage(currentLanguage);
+  };
+
+  // Apply all settings
+  const applySettings = () => {
+    // Apply theme
+    if (theme === "dark") {
       document.documentElement.classList.add("dark");
-    } else if (newTheme === "light") {
+    } else if (theme === "light") {
       document.documentElement.classList.remove("dark");
     } else {
       // Check system preference
@@ -54,38 +96,48 @@ const SettingsMenu = () => {
         document.documentElement.classList.remove("dark");
       }
     }
-  };
-
-  const toggleHighContrast = () => {
-    setIsHighContrast(!isHighContrast);
-    if (!isHighContrast) {
+    
+    // Apply accessibility settings
+    if (isHighContrast) {
       document.documentElement.classList.add("high-contrast");
     } else {
       document.documentElement.classList.remove("high-contrast");
     }
-  };
-
-  const toggleLargeText = () => {
-    setIsLargeText(!isLargeText);
-    if (!isLargeText) {
+    
+    if (isLargeText) {
       document.documentElement.classList.add("large-text");
     } else {
       document.documentElement.classList.remove("large-text");
     }
-  };
-
-  const toggleReduceMotion = () => {
-    setIsReduceMotion(!isReduceMotion);
-    if (!isReduceMotion) {
+    
+    if (isReduceMotion) {
       document.documentElement.classList.add("reduce-motion");
     } else {
       document.documentElement.classList.remove("reduce-motion");
     }
+    
+    // Apply language
+    if (language !== currentLanguage) {
+      setContextLanguage(language);
+      toast({
+        title: "Language Changed",
+        description: `Language set to ${language === 'en' ? 'English' : language === 'sn' ? 'Shona' : 'Ndebele'}`,
+      });
+    }
+    
+    toast({
+      title: "Settings Saved",
+      description: "Your preferences have been updated",
+    });
   };
 
-  const changeLanguage = (value: string) => {
-    setLanguage(value);
-    // In a real app, this would trigger language change throughout the app
+  const handleCancel = (close: () => void) => {
+    resetLocalSettings();
+    close();
+    toast({
+      title: "Changes Discarded",
+      description: "Settings have been reset to previous values",
+    });
   };
 
   return (
@@ -105,18 +157,14 @@ const SettingsMenu = () => {
         </SheetHeader>
         
         <Tabs defaultValue="appearance" className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6">
+          <TabsList className="grid grid-cols-2 mb-6">
             <TabsTrigger value="appearance">
               <Palette className="h-4 w-4 mr-2" />
               <span>Appearance</span>
             </TabsTrigger>
             <TabsTrigger value="accessibility">
-              <ZoomIn className="h-4 w-4 mr-2" />
-              <span>Accessibility</span>
-            </TabsTrigger>
-            <TabsTrigger value="language">
-              <Globe className="h-4 w-4 mr-2" />
-              <span>Language</span>
+              <Languages className="h-4 w-4 mr-2" />
+              <span>Language & Accessibility</span>
             </TabsTrigger>
           </TabsList>
           
@@ -127,7 +175,7 @@ const SettingsMenu = () => {
                 <Button
                   variant={theme === "light" ? "default" : "outline"}
                   className="justify-start"
-                  onClick={() => toggleTheme("light")}
+                  onClick={() => setTheme("light")}
                 >
                   <Sun className="mr-2 h-4 w-4" />
                   Light
@@ -135,7 +183,7 @@ const SettingsMenu = () => {
                 <Button
                   variant={theme === "dark" ? "default" : "outline"}
                   className="justify-start"
-                  onClick={() => toggleTheme("dark")}
+                  onClick={() => setTheme("dark")}
                 >
                   <Moon className="mr-2 h-4 w-4" />
                   Dark
@@ -143,7 +191,7 @@ const SettingsMenu = () => {
                 <Button
                   variant={theme === "system" ? "default" : "outline"}
                   className="justify-start"
-                  onClick={() => toggleTheme("system")}
+                  onClick={() => setTheme("system")}
                 >
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -158,73 +206,111 @@ const SettingsMenu = () => {
           
           <TabsContent value="accessibility" className="space-y-4">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <Label htmlFor="high-contrast" className="text-base">High Contrast</Label>
-                  <span className="text-xs text-muted-foreground">Increase contrast for better readability</span>
+              <h3 className="text-lg font-medium">Language & Region</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="language-select">Language</Label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger id="language-select">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="sn">Shona</SelectItem>
+                      <SelectItem value="nd">Ndebele</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Switch 
-                  id="high-contrast" 
-                  checked={isHighContrast}
-                  onCheckedChange={toggleHighContrast}
-                />
+                
+                <div className="space-y-2">
+                  <Label htmlFor="region-select">Region</Label>
+                  <Select value={region} onValueChange={setRegion}>
+                    <SelectTrigger id="region-select">
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="zw">Zimbabwe</SelectItem>
+                      <SelectItem value="za">South Africa</SelectItem>
+                      <SelectItem value="bw">Botswana</SelectItem>
+                      <SelectItem value="mz">Mozambique</SelectItem>
+                      <SelectItem value="zm">Zambia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <Label htmlFor="large-text" className="text-base">
-                    <Type className="h-4 w-4 inline mr-2" />
-                    Larger Text
-                  </Label>
-                  <span className="text-xs text-muted-foreground">Increase text size</span>
+              <h3 className="text-lg font-medium mt-6">Accessibility</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="high-contrast" className="text-base">High Contrast</Label>
+                    <span className="text-xs text-muted-foreground">Increase contrast for better readability</span>
+                  </div>
+                  <Switch 
+                    id="high-contrast" 
+                    checked={isHighContrast}
+                    onCheckedChange={setIsHighContrast}
+                  />
                 </div>
-                <Switch 
-                  id="large-text" 
-                  checked={isLargeText}
-                  onCheckedChange={toggleLargeText}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <Label htmlFor="reduce-motion" className="text-base">Reduce Motion</Label>
-                  <span className="text-xs text-muted-foreground">Minimize animation effects</span>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="large-text" className="text-base">
+                      <Type className="h-4 w-4 inline mr-2" />
+                      Larger Text
+                    </Label>
+                    <span className="text-xs text-muted-foreground">Increase text size</span>
+                  </div>
+                  <Switch 
+                    id="large-text" 
+                    checked={isLargeText}
+                    onCheckedChange={setIsLargeText}
+                  />
                 </div>
-                <Switch 
-                  id="reduce-motion" 
-                  checked={isReduceMotion}
-                  onCheckedChange={toggleReduceMotion}
-                />
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="reduce-motion" className="text-base">Reduce Motion</Label>
+                    <span className="text-xs text-muted-foreground">Minimize animation effects</span>
+                  </div>
+                  <Switch 
+                    id="reduce-motion" 
+                    checked={isReduceMotion}
+                    onCheckedChange={setIsReduceMotion}
+                  />
+                </div>
               </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="language" className="space-y-4">
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Select Language</h3>
-              <Select value={language} onValueChange={changeLanguage}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="fr">Français</SelectItem>
-                  <SelectItem value="es">Español</SelectItem>
-                  <SelectItem value="de">Deutsch</SelectItem>
-                  <SelectItem value="zh">中文</SelectItem>
-                  <SelectItem value="ja">日本語</SelectItem>
-                  <SelectItem value="ar">العربية</SelectItem>
-                  <SelectItem value="sn">Shona</SelectItem>
-                  <SelectItem value="nd">Ndebele</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </TabsContent>
         </Tabs>
         
-        <SheetFooter className="mt-6">
+        <SheetFooter className="mt-6 flex justify-between">
           <SheetClose asChild>
-            <Button type="submit" className="apple-button w-full">Done</Button>
+            {(close) => (
+              <Button 
+                variant="outline" 
+                className="w-1/2 mr-2"
+                onClick={() => handleCancel(close)}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancel
+              </Button>
+            )}
+          </SheetClose>
+          
+          <SheetClose asChild>
+            {(close) => (
+              <Button 
+                className="w-1/2 ml-2 apple-button"
+                onClick={() => {
+                  applySettings();
+                  close();
+                }}
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Save
+              </Button>
+            )}
           </SheetClose>
         </SheetFooter>
       </SheetContent>
