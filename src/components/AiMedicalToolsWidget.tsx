@@ -14,7 +14,10 @@ import {
   Heart,
   Calendar,
   Clock,
-  Watch
+  Watch,
+  Phone,
+  Pill,
+  ActivitySquare
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +30,7 @@ interface AiTool {
   icon: React.ReactNode;
   path: string;
   isNew?: boolean;
+  isPopular?: boolean;
 }
 
 const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
@@ -40,6 +44,16 @@ const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
       description: 'Get answers to your medical questions instantly',
       icon: <MessageCircle className="h-8 w-8 text-green-500" />,
       path: '/chat',
+      isPopular: true
+    },
+    {
+      id: 'wearables',
+      title: 'Health Wearables',
+      description: 'Connect devices & get AI health insights',
+      icon: <Watch className="h-8 w-8 text-cyan-500" />,
+      path: '/wearables',
+      isNew: true,
+      isPopular: true
     },
     {
       id: 'image',
@@ -80,7 +94,7 @@ const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
       id: 'appointments',
       title: 'Smart Scheduling',
       description: 'AI-powered appointment scheduling system',
-      icon: <Calendar className="h-8 w-8 text-cyan-500" />,
+      icon: <Calendar className="h-8 w-8 text-indigo-500" />,
       path: '/ai-features?feature=appointments',
     },
     {
@@ -91,14 +105,35 @@ const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
       path: '/queue',
     },
     {
-      id: 'wearables',
-      title: 'Smart Devices',
-      description: 'Connect your wearables for AI health insights',
-      icon: <Watch className="h-8 w-8 text-emerald-500" />,
-      path: '/wearables',
-      isNew: true,
+      id: 'teleconsult',
+      title: 'Virtual Doctor',
+      description: 'AI-assisted telehealth consultations',
+      icon: <Phone className="h-8 w-8 text-emerald-500" />,
+      path: '/ai-features',
+      isNew: true
+    },
+    {
+      id: 'medication',
+      title: 'Medication Assistant',
+      description: 'AI reminders and drug interaction checks',
+      icon: <Pill className="h-8 w-8 text-orange-500" />,
+      path: '/ai-features',
+    },
+    {
+      id: 'activity',
+      title: 'Fitness Planner',
+      description: 'AI-generated exercise plans based on health',
+      icon: <ActivitySquare className="h-8 w-8 text-teal-500" />,
+      path: '/ai-features',
+      isNew: true
     }
   ];
+
+  // Get popular tools
+  const popularTools = aiTools.filter(tool => tool.isPopular);
+  
+  // Get the rest of the tools
+  const otherTools = aiTools.filter(tool => !tool.isPopular);
 
   const handleToolClick = async (tool: AiTool) => {
     // Track user interaction with AI tools
@@ -130,8 +165,46 @@ const AiMedicalToolsWidget = ({ className }: { className?: string }) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Featured section for popular tools */}
+        {popularTools.length > 0 && (
+          <>
+            <h3 className="text-sm font-medium mb-3">Featured Tools</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+              {popularTools.map((tool) => (
+                <Link 
+                  key={tool.id} 
+                  to={tool.path} 
+                  className="block"
+                  onClick={() => handleToolClick(tool)}
+                >
+                  <Card className="h-full hover:shadow-md transition-all hover:bg-muted border-none relative">
+                    {tool.isNew && (
+                      <span className="absolute top-1 right-1 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                        New
+                      </span>
+                    )}
+                    <CardContent className="p-4 flex items-center">
+                      <div className="mr-4 flex-shrink-0">
+                        {tool.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-base mb-1">{tool.title}</h3>
+                        <p className="text-xs text-muted-foreground leading-tight">
+                          {tool.description}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+        
+        {/* Grid of all other tools */}
+        <h3 className="text-sm font-medium mb-3">All Tools</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {aiTools.map((tool) => (
+          {otherTools.map((tool) => (
             <Link 
               key={tool.id} 
               to={tool.path} 
