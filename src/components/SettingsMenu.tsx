@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Settings, 
@@ -45,7 +44,7 @@ const SettingsMenu = () => {
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [isLargeText, setIsLargeText] = useState(false);
   const [isReduceMotion, setIsReduceMotion] = useState(false);
-  const [language, setLanguage] = useState(currentLanguage);
+  const [language, setLanguage] = useState<"en" | "sn" | "nd">(currentLanguage);
   const [region, setRegion] = useState("zw");
   
   // Initialize theme state from document
@@ -140,6 +139,19 @@ const SettingsMenu = () => {
     });
   };
 
+  // Type-safe handler for language selection
+  const handleLanguageChange = (value: string) => {
+    // Only accept valid language values
+    if (value === "en" || value === "sn" || value === "nd") {
+      setLanguage(value);
+    }
+  };
+
+  // Type-safe handler for region selection
+  const handleRegionChange = (value: string) => {
+    setRegion(value);
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -210,7 +222,7 @@ const SettingsMenu = () => {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="language-select">Language</Label>
-                  <Select value={language} onValueChange={setLanguage}>
+                  <Select value={language} onValueChange={handleLanguageChange}>
                     <SelectTrigger id="language-select">
                       <SelectValue placeholder="Select language" />
                     </SelectTrigger>
@@ -224,7 +236,7 @@ const SettingsMenu = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="region-select">Region</Label>
-                  <Select value={region} onValueChange={setRegion}>
+                  <Select value={region} onValueChange={handleRegionChange}>
                     <SelectTrigger id="region-select">
                       <SelectValue placeholder="Select region" />
                     </SelectTrigger>
@@ -286,31 +298,26 @@ const SettingsMenu = () => {
         
         <SheetFooter className="mt-6 flex justify-between">
           <SheetClose asChild>
-            {(close) => (
-              <Button 
-                variant="outline" 
-                className="w-1/2 mr-2"
-                onClick={() => handleCancel(close)}
-              >
-                <X className="mr-2 h-4 w-4" />
-                Cancel
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              className="w-1/2 mr-2"
+              onClick={() => handleCancel(() => {})}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
           </SheetClose>
           
           <SheetClose asChild>
-            {(close) => (
-              <Button 
-                className="w-1/2 ml-2 apple-button"
-                onClick={() => {
-                  applySettings();
-                  close();
-                }}
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Save
-              </Button>
-            )}
+            <Button 
+              className="w-1/2 ml-2 apple-button"
+              onClick={() => {
+                applySettings();
+              }}
+            >
+              <Check className="mr-2 h-4 w-4" />
+              Save
+            </Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>
