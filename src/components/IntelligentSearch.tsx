@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Brain, Sparkles } from "lucide-react";
+import { Search, Brain, Sparkles, Star, MapPin, Clock, ChevronRight } from "lucide-react";
 
 // Simple NLP processing for search - in a real app, this would use more advanced NLP models
 const processNaturalLanguageQuery = (query: string) => {
@@ -62,7 +63,9 @@ const hospitalData = [
     services: ["emergency", "cardiology", "neurology", "surgery", "diagnostic", "orthopedic"],
     location: "central",
     isOpen24Hours: true,
-    waitTime: "45min"
+    waitTime: "45min",
+    rating: 4.1,
+    image: "https://images.unsplash.com/photo-1587351021759-3772687ccc74?q=80&w=200&auto=format&fit=crop"
   },
   {
     id: 2,
@@ -70,7 +73,9 @@ const hospitalData = [
     services: ["emergency", "pediatric", "surgery", "diagnostic"],
     location: "south",
     isOpen24Hours: true,
-    waitTime: "30min"
+    waitTime: "30min",
+    rating: 4.3,
+    image: "https://images.unsplash.com/photo-1516549655669-d2190a7ea12d?q=80&w=200&auto=format&fit=crop"
   },
   {
     id: 3,
@@ -78,7 +83,9 @@ const hospitalData = [
     services: ["cardiology", "orthopedic", "maternity", "diagnostic", "surgery"],
     location: "north",
     isOpen24Hours: false,
-    waitTime: "15min"
+    waitTime: "15min",
+    rating: 4.7,
+    image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=200&auto=format&fit=crop"
   },
   {
     id: 4,
@@ -86,7 +93,9 @@ const hospitalData = [
     services: ["orthopedic", "diagnostic", "surgery"],
     location: "west",
     isOpen24Hours: false,
-    waitTime: "20min"
+    waitTime: "20min",
+    rating: 3.9,
+    image: "https://images.unsplash.com/photo-1519494140681-8b17d830a3e9?q=80&w=200&auto=format&fit=crop"
   },
   {
     id: 5,
@@ -94,7 +103,9 @@ const hospitalData = [
     services: ["emergency", "pediatric", "maternity"],
     location: "east",
     isOpen24Hours: true,
-    waitTime: "40min"
+    waitTime: "40min",
+    rating: 4.0,
+    image: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=200&auto=format&fit=crop"
   }
 ];
 
@@ -176,10 +187,10 @@ const IntelligentSearch: React.FC<IntelligentSearchProps> = ({ onHospitalSelect,
 
   return (
     <div className={className}>
-      <Card>
+      <Card className="rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Brain className="h-5 w-5 mr-2 text-purple-500" />
+            <Brain className="h-5 w-5 mr-2 text-primary" />
             Intelligent Hospital Search
           </CardTitle>
           <CardDescription>
@@ -188,14 +199,21 @@ const IntelligentSearch: React.FC<IntelligentSearchProps> = ({ onHospitalSelect,
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2 mb-4">
-            <Input
-              placeholder="E.g. 'I need a pediatric hospital with short wait times near me'"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className="flex-1"
-            />
-            <Button onClick={handleSearch} disabled={isSearching}>
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="E.g. 'I need a pediatric hospital with short wait times near me'"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyPress}
+                className="pl-9 modern-input"
+              />
+            </div>
+            <Button 
+              size="pill" 
+              disabled={isSearching}
+              onClick={handleSearch}
+            >
               {isSearching ? (
                 <div className="flex items-center">
                   <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
@@ -213,7 +231,7 @@ const IntelligentSearch: React.FC<IntelligentSearchProps> = ({ onHospitalSelect,
           {structuredQuery && (
             <div className="p-3 bg-muted rounded-md mb-4 text-sm">
               <div className="font-medium flex items-center">
-                <Sparkles className="h-4 w-4 mr-1 text-purple-500" />
+                <Sparkles className="h-4 w-4 mr-1 text-primary" />
                 AI understood your query as:
               </div>
               <ul className="mt-1 space-y-1 text-muted-foreground">
@@ -237,24 +255,46 @@ const IntelligentSearch: React.FC<IntelligentSearchProps> = ({ onHospitalSelect,
             <div className="space-y-3">
               <h3 className="text-lg font-medium">Search Results</h3>
               {searchResults.map(hospital => (
-                <Card key={hospital.id} className="hover:shadow-md transition-all">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">{hospital.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Services: {hospital.services.join(', ')}
-                        </p>
-                        <p className="text-sm">Wait time: {hospital.waitTime}</p>
-                      </div>
-                      <Button 
-                        size="sm" 
-                        onClick={() => onHospitalSelect && onHospitalSelect(hospital.id)}
-                      >
-                        Select
-                      </Button>
+                <Card key={hospital.id} className="rounded-xl overflow-hidden hover:shadow-md transition-all">
+                  <div className="flex">
+                    <div className="w-1/4">
+                      <img 
+                        src={hospital.image} 
+                        alt={hospital.name} 
+                        className="h-full w-full object-cover"
+                      />
                     </div>
-                  </CardContent>
+                    <CardContent className="p-4 w-3/4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-medium">{hospital.name}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="rating" className="flex items-center gap-1">
+                              <Star className="h-3 w-3" />
+                              {hospital.rating}
+                            </Badge>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Clock className="h-3.5 w-3.5 mr-1" /> 
+                              {hospital.waitTime} wait
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1 flex items-center">
+                            <MapPin className="h-3.5 w-3.5 mr-1" />
+                            {hospital.location}
+                          </p>
+                        </div>
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={() => onHospitalSelect && onHospitalSelect(hospital.id)}
+                        >
+                          Details
+                          <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </div>
                 </Card>
               ))}
             </div>

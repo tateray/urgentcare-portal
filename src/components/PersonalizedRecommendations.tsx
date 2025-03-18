@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, Star, Clock, MapPin, Stethoscope, ArrowUpRight } from "lucide-react";
 
@@ -204,7 +205,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Heart className="h-5 w-5 mr-2 text-pink-500" />
+            <Heart className="h-5 w-5 mr-2 text-primary" />
             Personalized Recommendations
           </CardTitle>
           <CardDescription>
@@ -227,7 +228,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center">
-          <Heart className="h-5 w-5 mr-2 text-pink-500" />
+          <Heart className="h-5 w-5 mr-2 text-primary" />
           Personalized Recommendations
         </CardTitle>
         <CardDescription>
@@ -241,7 +242,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
               <h3 className="text-lg font-medium mb-3">{recommendationGroup.title}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {recommendationGroup.hospitals.map((hospital: any) => (
-                  <Card key={hospital.id} className="overflow-hidden hover:shadow-md transition-all">
+                  <Card key={hospital.id} className="overflow-hidden rounded-2xl hover:shadow-md transition-all">
                     <div className="aspect-video w-full overflow-hidden bg-muted">
                       <img
                         src={hospital.image}
@@ -253,9 +254,10 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
                       <h4 className="font-bold">{hospital.name}</h4>
                       
                       <div className="flex items-center text-sm text-muted-foreground mt-1">
-                        <Star className="h-3.5 w-3.5 mr-1 text-yellow-500" />
-                        <span>{hospital.rating}</span>
-                        <span className="mx-2">•</span>
+                        <Badge variant="rating" className="flex items-center gap-1 mr-2">
+                          <Star className="h-3 w-3" />
+                          {hospital.rating}
+                        </Badge>
                         <MapPin className="h-3.5 w-3.5 mr-1" />
                         <span>{hospital.distance} km</span>
                         <span className="mx-2">•</span>
@@ -267,7 +269,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
                         {hospital.specialty.map((spec: string, i: number) => (
                           <span 
                             key={i}
-                            className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300"
+                            className="specialty-badge"
                           >
                             <Stethoscope className="h-3 w-3 mr-1" />
                             {spec}
@@ -280,8 +282,8 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
                       </p>
                       
                       <Button 
-                        variant="outline" 
-                        className="w-full mt-3"
+                        size="sm"
+                        className="w-full mt-3 rounded-xl"
                         onClick={() => handleSelectHospital(hospital.id)}
                       >
                         View Hospital

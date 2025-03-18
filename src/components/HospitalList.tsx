@@ -2,7 +2,8 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, MapPin, Phone, Navigation, Star, Info, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Clock, MapPin, Phone, Navigation, Star, Info, ShieldCheck, Stethoscope } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Facility {
@@ -16,19 +17,22 @@ interface Facility {
   specialty?: string;
   rating?: number;
   open_until?: string;
+  image?: string;
 }
 
 interface HospitalListProps {
   facilities: Facility[];
   onDirections: (facility: Facility) => void;
   onCall: (phone: string) => void;
-  view?: 'compact' | 'detailed';
+  onSelect?: (facility: Facility) => void;
+  view?: 'compact' | 'detailed' | 'specialist';
 }
 
 const HospitalList: React.FC<HospitalListProps> = ({ 
   facilities, 
   onDirections, 
   onCall,
+  onSelect,
   view = 'detailed'
 }) => {
   // Helper function to get the facility color and icon based on the type
@@ -79,6 +83,69 @@ const HospitalList: React.FC<HospitalListProps> = ({
     };
   };
 
+  if (view === 'specialist') {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold mb-4">Choose Your Specialist</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {facilities.map((facility) => (
+            <Card 
+              key={facility.id}
+              className="specialist-card cursor-pointer"
+              onClick={() => onSelect && onSelect(facility)}
+            >
+              <div className="flex overflow-hidden">
+                <div className="w-1/3">
+                  <img 
+                    src={facility.image || "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop"}
+                    alt={facility.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="w-2/3 p-4">
+                  <div className="flex flex-col h-full justify-between">
+                    <div>
+                      {facility.specialty && (
+                        <p className="text-xs text-primary uppercase tracking-wide mb-1">
+                          {facility.specialty}
+                        </p>
+                      )}
+                      
+                      <h3 className="font-bold text-lg">
+                        Dr. {facility.name}
+                      </h3>
+                      
+                      <div className="flex items-center gap-1 mt-1">
+                        <Badge variant="rating" className="flex items-center gap-1">
+                          <Star className="h-3 w-3" />
+                          Rating {facility.rating || "5.0"}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" /> 
+                        {facility.address}
+                      </p>
+                      
+                      {facility.wait_time !== undefined && (
+                        <p className="text-sm flex items-center gap-1 mt-1">
+                          <Clock className="h-3.5 w-3.5" /> 
+                          {facility.wait_time} min wait
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {facilities.map((facility) => {
@@ -88,8 +155,8 @@ const HospitalList: React.FC<HospitalListProps> = ({
           <Card 
             key={facility.id} 
             className={cn(
-              "hover:shadow-md transition-all border-l-4", 
-              facilityMeta.borderColor
+              "rounded-2xl hover:shadow-md transition-all", 
+              view === 'detailed' ? "" : ""
             )}
           >
             <CardContent className="p-4">
@@ -104,7 +171,7 @@ const HospitalList: React.FC<HospitalListProps> = ({
                   <div className="flex items-start justify-between">
                     <div>
                       {facility.specialty && (
-                        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                        <p className="text-xs text-primary uppercase tracking-wide mb-1">
                           {facility.specialty}
                         </p>
                       )}
@@ -132,10 +199,10 @@ const HospitalList: React.FC<HospitalListProps> = ({
                         )}
                         
                         {facility.rating && (
-                          <p className="text-sm flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
-                            <span className="font-medium">{facility.rating}</span>
-                          </p>
+                          <Badge variant="rating" className="flex items-center gap-1">
+                            <Star className="h-3 w-3" />
+                            {facility.rating}
+                          </Badge>
                         )}
                         
                         {facility.wait_time !== undefined && (
@@ -149,12 +216,12 @@ const HospitalList: React.FC<HospitalListProps> = ({
                     
                     <div className="flex flex-col items-end gap-2">
                       {facility.emergency && (
-                        <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                        <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-medium">
                           24h Emergency
                         </span>
                       )}
                       
-                      {facility.distance && (
+                      {facility.distance && view !== 'detailed' && (
                         <span className="text-sm font-medium text-blue-600">
                           {facility.distance}
                         </span>
@@ -169,9 +236,8 @@ const HospitalList: React.FC<HospitalListProps> = ({
                     
                     <div className="flex gap-2">
                       <Button 
-                        size="sm" 
+                        size="pill" 
                         variant="outline"
-                        className="h-8 px-3 rounded-full" 
                         onClick={() => onCall(facility.phone)}
                       >
                         <Phone className="h-3.5 w-3.5 mr-1" />
@@ -179,8 +245,8 @@ const HospitalList: React.FC<HospitalListProps> = ({
                       </Button>
                       
                       <Button 
-                        size="sm"
-                        className="h-8 px-3 rounded-full bg-blue-600 hover:bg-blue-700"
+                        size="pill"
+                        className="bg-primary"
                         onClick={() => onDirections(facility)}
                       >
                         <Navigation className="h-3.5 w-3.5 mr-1" />
