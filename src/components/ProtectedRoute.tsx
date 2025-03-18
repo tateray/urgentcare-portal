@@ -7,10 +7,10 @@ import { Loader2 } from 'lucide-react';
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
-  adminOnly?: boolean;
+  requireAdmin?: boolean;
 };
 
-const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const location = useLocation();
@@ -61,7 +61,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
   }
 
   // For admin-only routes, check if user has admin role
-  if (adminOnly) {
+  if (requireAdmin) {
     // This is a simplified check - in a real app, you'd check a claim or database
     const isAdmin = user.email?.includes('admin');
     

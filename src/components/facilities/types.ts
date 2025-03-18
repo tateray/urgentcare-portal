@@ -1,6 +1,6 @@
 
 export interface Facility {
-  id: number;
+  id: number | string;
   name: string;
   address: string;
   distance?: string;
@@ -11,4 +11,5 @@ export interface Facility {
   rating?: number;
   open_until?: string;
   image?: string;
+  timeToReach?: string;
 }

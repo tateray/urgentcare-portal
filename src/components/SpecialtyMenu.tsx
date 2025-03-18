@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { 
   Heart, 
   Stethoscope, 
-  Tooth, 
+  Smile, 
   Baby, 
   Brain, 
   Bone, 
@@ -31,7 +31,7 @@ const specialties: SpecialtyOption[] = [
     path: "/specialty/cardiology"
   },
   {
-    icon: <Tooth className="h-6 w-6" />,
+    icon: <Smile className="h-6 w-6" />,
     name: "Dental",
     color: "text-blue-500",
     bgColor: "bg-blue-50",
