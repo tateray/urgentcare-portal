@@ -14,7 +14,8 @@ import {
   Weight,
   Pill,
   Settings,
-  RefreshCw
+  RefreshCw,
+  Plus
 } from 'lucide-react';
 
 interface SelfHelpWidgetProps {

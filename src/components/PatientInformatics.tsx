@@ -89,7 +89,7 @@ const PatientInformatics: React.FC<PatientInfoProps> = ({ userId }) => {
       
       if (data) {
         // Set patient name from profile data
-        const fullName = data.full_name || "Patient";
+        const fullName = data.email || "Patient"; // Fallback to email or "Patient"
         setPatientName(fullName);
       }
     } catch (error) {
