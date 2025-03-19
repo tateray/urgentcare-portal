@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Heart, Activity, ArrowRight, Pulse, Plus, ThermometerIcon } from 'lucide-react';
+import { Heart, Activity, ArrowRight, ThermometerIcon, Plus, HeartPulse } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, orderBy, limit, Timestamp } from 'firebase/firestore';
@@ -290,7 +289,7 @@ const PatientInformatics: React.FC<PatientInformaticsProps> = ({ userId }) => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center">
-                  <Pulse className="h-4 w-4 mr-2 text-pink-500" />
+                  <HeartPulse className="h-4 w-4 mr-2 text-pink-500" />
                   Heart Rate
                 </CardTitle>
               </CardHeader>
