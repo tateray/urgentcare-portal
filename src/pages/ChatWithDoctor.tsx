@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Phone, User, Bot, Paperclip, AlertCircle } from "lucide-react";
+import { ArrowLeft, Send, Phone, User, Bot, Paperclip, AlertCircle, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +34,7 @@ const ChatWithDoctor = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | null>(null);
+  const [poeUrl, setPoeUrl] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Auto-scroll to bottom of messages
@@ -87,6 +88,11 @@ const ChatWithDoctor = () => {
       });
       
       if (error) throw error;
+      
+      // Set Poe URL if provided
+      if (data.poeUrl) {
+        setPoeUrl(data.poeUrl);
+      }
       
       // Add main response from chatbot
       const botResponse: Message = {
@@ -160,6 +166,16 @@ const ChatWithDoctor = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
   
+  const handleOpenPoe = () => {
+    if (poeUrl) {
+      window.open(poeUrl, '_blank');
+      toast({
+        title: "Opening Poe Bot",
+        description: "Redirecting to the EMSvcbot on Poe",
+      });
+    }
+  };
+  
   return (
     <div className="container mx-auto h-[calc(100vh-2rem)] flex flex-col py-4 px-4">
       <div className="flex items-center mb-4">
@@ -170,7 +186,17 @@ const ChatWithDoctor = () => {
         </Link>
         <h1 className="text-2xl font-bold">AI Medical Assistant</h1>
         
-        <div className="ml-auto">
+        <div className="ml-auto flex gap-2">
+          {poeUrl && (
+            <Button 
+              variant="outline" 
+              onClick={handleOpenPoe}
+              className="flex items-center gap-1"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open EMSvcbot
+            </Button>
+          )}
           <Button 
             variant="outline" 
             size="icon"
@@ -293,7 +319,19 @@ const ChatWithDoctor = () => {
           </form>
           
           <div className="mt-2 text-xs text-muted-foreground text-center">
-            <p>For emergencies, please call 999 or visit your nearest emergency room</p>
+            {poeUrl ? (
+              <p>
+                For more comprehensive responses,{" "}
+                <button 
+                  onClick={handleOpenPoe}
+                  className="text-primary hover:underline"
+                >
+                  continue this conversation on Poe
+                </button>
+              </p>
+            ) : (
+              <p>For emergencies, please call 999 or visit your nearest emergency room</p>
+            )}
           </div>
         </div>
       </Card>
