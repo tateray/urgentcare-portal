@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Phone, User, Bot, Paperclip, AlertCircle, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
@@ -20,13 +20,55 @@ interface RiskAssessment {
   message: string;
 }
 
+interface ServiceRecommendation {
+  id: string;
+  name: string;
+  description: string;
+  path: string;
+}
+
+const ASSISTANT_PERSONAS = {
+  general: {
+    name: "Dr. AI Health Assistant",
+    greeting: "Hello! I'm your personal health assistant. How can I help you today?",
+    color: "bg-primary"
+  },
+  imageAnalysis: {
+    name: "Dr. Vision",
+    greeting: "Hello! I'm Dr. Vision. I can analyze images of symptoms to help identify potential health issues. Upload an image or describe what you're seeing.",
+    color: "bg-purple-500"
+  },
+  medicalAssistant: {
+    name: "Dr. MedInfo",
+    greeting: "Hello! I'm Dr. MedInfo. I can provide detailed medical information, explanations about conditions, and answer health-related questions.",
+    color: "bg-blue-500"
+  },
+  personalizedCare: {
+    name: "Dr. Care",
+    greeting: "Hello! I'm Dr. Care. I provide personalized health recommendations based on your profile and health goals. How can I assist you today?",
+    color: "bg-green-500"
+  },
+  fitnessPlanner: {
+    name: "Dr. Fit",
+    greeting: "Hello! I'm Dr. Fit. I can help create fitness plans tailored to your health status and goals. What fitness goals are you working towards?",
+    color: "bg-orange-500"
+  },
+  riskAssessment: {
+    name: "Dr. Assess",
+    greeting: "Hello! I'm Dr. Assess. I can help evaluate your health risks based on symptoms and health history. What would you like me to assess?",
+    color: "bg-red-500"
+  }
+};
+
 const ChatWithDoctor = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [input, setInput] = useState("");
+  const [persona, setPersona] = useState<keyof typeof ASSISTANT_PERSONAS>("general");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! I'm Dr. AI, your medical assistant. How can I help you today?",
+      text: ASSISTANT_PERSONAS[persona].greeting,
       sender: 'bot',
       timestamp: new Date()
     }
@@ -34,13 +76,28 @@ const ChatWithDoctor = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | null>(null);
-  const [poeUrl, setPoeUrl] = useState<string | null>(null);
+  const [serviceRecommendations, setServiceRecommendations] = useState<ServiceRecommendation[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Auto-scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+  
+  // Update greeting when persona changes
+  useEffect(() => {
+    setMessages([
+      {
+        id: 1,
+        text: ASSISTANT_PERSONAS[persona].greeting,
+        sender: 'bot',
+        timestamp: new Date()
+      }
+    ]);
+    setConversationHistory([]);
+    setRiskAssessment(null);
+    setServiceRecommendations([]);
+  }, [persona]);
   
   const saveMessageToDatabase = async (message: string, response: string) => {
     try {
@@ -89,11 +146,6 @@ const ChatWithDoctor = () => {
       
       if (error) throw error;
       
-      // Set Poe URL if provided
-      if (data.poeUrl) {
-        setPoeUrl(data.poeUrl);
-      }
-      
       // Add main response from chatbot
       const botResponse: Message = {
         id: Date.now() + 1,
@@ -119,6 +171,11 @@ const ChatWithDoctor = () => {
             variant: data.risk.level === 'high' ? 'destructive' : 'default',
           });
         }
+      }
+      
+      // Set service recommendations if provided
+      if (data.recommendedServices && data.recommendedServices.length > 0) {
+        setServiceRecommendations(data.recommendedServices);
       }
       
       // After a short delay, add follow-up question
@@ -166,14 +223,19 @@ const ChatWithDoctor = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
   
-  const handleOpenPoe = () => {
-    if (poeUrl) {
-      window.open(poeUrl, '_blank');
+  const handleSwitchPersona = (newPersona: keyof typeof ASSISTANT_PERSONAS) => {
+    if (newPersona !== persona) {
+      setPersona(newPersona);
+      
       toast({
-        title: "Opening Poe Bot",
-        description: "Redirecting to the EMSvcbot on Poe",
+        title: `Switched to ${ASSISTANT_PERSONAS[newPersona].name}`,
+        description: "Your conversation has been reset with a new assistant",
       });
     }
+  };
+  
+  const handleServiceSelect = (path: string) => {
+    navigate(path);
   };
   
   return (
@@ -184,19 +246,9 @@ const ChatWithDoctor = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold">AI Medical Assistant</h1>
+        <h1 className="text-2xl font-bold">{ASSISTANT_PERSONAS[persona].name}</h1>
         
         <div className="ml-auto flex gap-2">
-          {poeUrl && (
-            <Button 
-              variant="outline" 
-              onClick={handleOpenPoe}
-              className="flex items-center gap-1"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Open EMSvcbot
-            </Button>
-          )}
           <Button 
             variant="outline" 
             size="icon"
@@ -210,6 +262,58 @@ const ChatWithDoctor = () => {
             <Phone className="h-5 w-5" />
           </Button>
         </div>
+      </div>
+      
+      {/* Persona selector */}
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-2">
+        <Button 
+          variant={persona === "general" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => handleSwitchPersona("general")}
+          className="whitespace-nowrap"
+        >
+          General Health
+        </Button>
+        <Button 
+          variant={persona === "imageAnalysis" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => handleSwitchPersona("imageAnalysis")}
+          className="whitespace-nowrap"
+        >
+          Image Analysis
+        </Button>
+        <Button 
+          variant={persona === "medicalAssistant" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => handleSwitchPersona("medicalAssistant")}
+          className="whitespace-nowrap"
+        >
+          Medical Assistant
+        </Button>
+        <Button 
+          variant={persona === "personalizedCare" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => handleSwitchPersona("personalizedCare")}
+          className="whitespace-nowrap"
+        >
+          Personalized Care
+        </Button>
+        <Button 
+          variant={persona === "fitnessPlanner" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => handleSwitchPersona("fitnessPlanner")}
+          className="whitespace-nowrap"
+        >
+          Fitness Planner
+        </Button>
+        <Button 
+          variant={persona === "riskAssessment" ? "default" : "outline"} 
+          size="sm"
+          onClick={() => handleSwitchPersona("riskAssessment")}
+          className="whitespace-nowrap"
+        >
+          Risk Assessment
+        </Button>
       </div>
       
       {riskAssessment && riskAssessment.level !== 'low' && (
@@ -231,12 +335,12 @@ const ChatWithDoctor = () => {
               >
                 <div className={`flex items-start max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${
-                    message.sender === 'user' ? 'bg-primary ml-2' : 'bg-muted'
+                    message.sender === 'user' ? 'bg-primary ml-2' : message.sender === 'bot' ? ASSISTANT_PERSONAS[persona].color : 'bg-muted'
                   }`}>
                     {message.sender === 'user' ? (
                       <User className="h-4 w-4 text-primary-foreground" />
                     ) : (
-                      <Bot className="h-4 w-4" />
+                      <Bot className="h-4 w-4 text-white" />
                     )}
                   </div>
                   
@@ -245,7 +349,7 @@ const ChatWithDoctor = () => {
                       className={`rounded-lg px-4 py-2 ${
                         message.sender === 'user' 
                           ? 'bg-primary text-primary-foreground' 
-                          : 'bg-muted'
+                          : message.sender === 'bot' ? `${ASSISTANT_PERSONAS[persona].color} text-white` : 'bg-muted'
                       }`}
                     >
                       <p className="whitespace-pre-wrap break-words">{message.text}</p>
@@ -258,14 +362,37 @@ const ChatWithDoctor = () => {
               </div>
             ))}
             
+            {/* Service recommendations */}
+            {serviceRecommendations.length > 0 && !isTyping && (
+              <div className="flex justify-start">
+                <div className="max-w-[90%]">
+                  <p className="text-sm font-medium mb-2">Recommended services:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {serviceRecommendations.map((service) => (
+                      <Button 
+                        key={service.id}
+                        variant="outline" 
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={() => handleServiceSelect(service.path)}
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        {service.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {isTyping && (
               <div className="flex justify-start">
                 <div className="flex items-start max-w-[80%]">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted mr-2">
-                    <Bot className="h-4 w-4" />
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${ASSISTANT_PERSONAS[persona].color}`}>
+                    <Bot className="h-4 w-4 text-white" />
                   </div>
                   
-                  <div className="rounded-lg px-4 py-2 bg-muted">
+                  <div className={`rounded-lg px-4 py-2 ${ASSISTANT_PERSONAS[persona].color} text-white`}>
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 rounded-full bg-current animate-bounce" />
                       <div className="w-2 h-2 rounded-full bg-current animate-bounce [animation-delay:0.2s]" />
@@ -293,17 +420,21 @@ const ChatWithDoctor = () => {
               variant="outline" 
               size="icon"
               onClick={() => {
-                toast({
-                  title: "Attach Files",
-                  description: "Please select a file to upload",
-                });
+                if (persona === "imageAnalysis") {
+                  navigate("/ai-features?feature=image");
+                } else {
+                  toast({
+                    title: "Attach Files",
+                    description: "Please select a file to upload",
+                  });
+                }
               }}
             >
               <Paperclip className="h-5 w-5" />
             </Button>
             
             <Input
-              placeholder="Describe your symptoms or ask a medical question..."
+              placeholder={`Ask ${ASSISTANT_PERSONAS[persona].name.split(' ')[0]} a question...`}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
@@ -319,19 +450,7 @@ const ChatWithDoctor = () => {
           </form>
           
           <div className="mt-2 text-xs text-muted-foreground text-center">
-            {poeUrl ? (
-              <p>
-                For more comprehensive responses,{" "}
-                <button 
-                  onClick={handleOpenPoe}
-                  className="text-primary hover:underline"
-                >
-                  continue this conversation on Poe
-                </button>
-              </p>
-            ) : (
-              <p>For emergencies, please call 999 or visit your nearest emergency room</p>
-            )}
+            <p>For emergencies, please call 999 or visit your nearest emergency room</p>
           </div>
         </div>
       </Card>
