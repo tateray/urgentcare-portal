@@ -94,8 +94,7 @@ const UserDashboard = () => {
             </Button>
           </CardContent>
         </Card>
-
-        {/* Add new Self Health Monitoring card */}
+        
         <Link to="/self-health-monitoring" className="block">
           <Card className="transition-all hover:shadow-md">
             <CardHeader className="pb-2">
