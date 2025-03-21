@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Moon, Sun, Languages, Accessibility, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SettingsPanelProps {
   open: boolean;
@@ -23,11 +24,17 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   toggleDarkMode
 }) => {
   const { toast } = useToast();
-  const [language, setLanguage] = useState<string>("english");
+  const { language: currentLanguage, setLanguage: setContextLanguage, t } = useLanguage();
+  const [language, setLanguage] = useState<"en" | "sn" | "nd">(currentLanguage);
   const [highContrast, setHighContrast] = useState<boolean>(false);
   const [largeText, setLargeText] = useState<boolean>(false);
   const [reduceMotion, setReduceMotion] = useState<boolean>(false);
   const [screenReader, setScreenReader] = useState<boolean>(false);
+
+  // Update internal state when context language changes
+  useEffect(() => {
+    setLanguage(currentLanguage);
+  }, [currentLanguage]);
 
   // Apply accessibility settings
   useEffect(() => {
@@ -53,12 +60,15 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   }, [highContrast, largeText, reduceMotion]);
 
   const handleLanguageChange = (value: string) => {
-    setLanguage(value);
-    toast({
-      title: "Language Changed",
-      description: `Language set to ${value.charAt(0).toUpperCase() + value.slice(1)}`,
-    });
-    // In a real app, this would trigger language context/state changes
+    if (value === "en" || value === "sn" || value === "nd") {
+      setLanguage(value);
+      setContextLanguage(value);
+      
+      toast({
+        title: t('language_changed'),
+        description: `${t('language_set_to')} ${value === 'en' ? t('english') : value === 'sn' ? t('shona') : t('ndebele')}`,
+      });
+    }
   };
 
   const toggleHighContrast = () => {
@@ -91,7 +101,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       title: screenReader ? "Screen Reader Support Disabled" : "Screen Reader Support Enabled",
       description: "Your accessibility preferences have been updated.",
     });
-    // In a real app, this would enable screen reader compatibility mode
   };
 
   return (
@@ -102,18 +111,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            Settings
+            {t('settings')}
           </DialogTitle>
           <DialogDescription>
-            Customize your application preferences
+            {t('customize_experience')}
           </DialogDescription>
         </DialogHeader>
         
         <Tabs defaultValue="appearance" className="w-full">
           <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="appearance">Appearance</TabsTrigger>
-            <TabsTrigger value="language">Language</TabsTrigger>
-            <TabsTrigger value="accessibility">Accessibility</TabsTrigger>
+            <TabsTrigger value="appearance">{t('appearance')}</TabsTrigger>
+            <TabsTrigger value="language">{t('language')}</TabsTrigger>
+            <TabsTrigger value="accessibility">{t('accessibility')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="appearance" className="space-y-4 pt-4">
@@ -121,7 +130,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <div className="flex items-center gap-2">
                 {darkMode ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
                 <Label htmlFor="dark-mode" className="font-medium">
-                  {darkMode ? "Dark Mode" : "Light Mode"}
+                  {darkMode ? t('dark_mode') : t('light_mode')}
                 </Label>
               </div>
               <Switch
@@ -140,18 +149,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="flex items-center gap-2 mb-2">
               <Languages className="h-5 w-5" />
               <Label htmlFor="language-select" className="font-medium">
-                Display Language
+                {t('display_language')}
               </Label>
             </div>
             
             <Select value={language} onValueChange={handleLanguageChange}>
               <SelectTrigger id="language-select">
-                <SelectValue placeholder="Select language" />
+                <SelectValue placeholder={`${t('language')}`} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="english">English</SelectItem>
-                <SelectItem value="shona">Shona</SelectItem>
-                <SelectItem value="ndebele">Ndebele</SelectItem>
+                <SelectItem value="en">{t('english')}</SelectItem>
+                <SelectItem value="sn">{t('shona')}</SelectItem>
+                <SelectItem value="nd">{t('ndebele')}</SelectItem>
               </SelectContent>
             </Select>
             
@@ -165,7 +174,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <div className="flex items-center gap-2">
                 <Accessibility className="h-5 w-5" />
                 <Label htmlFor="high-contrast" className="font-medium">
-                  High Contrast
+                  {t('high_contrast')}
                 </Label>
               </div>
               <Switch
@@ -177,7 +186,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             
             <div className="flex items-center justify-between">
               <Label htmlFor="large-text" className="font-medium">
-                Large Text
+                {t('large_text')}
               </Label>
               <Switch
                 id="large-text"
@@ -188,7 +197,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             
             <div className="flex items-center justify-between">
               <Label htmlFor="reduce-motion" className="font-medium">
-                Reduce Motion
+                {t('reduce_motion')}
               </Label>
               <Switch
                 id="reduce-motion"
@@ -215,7 +224,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </Tabs>
         
         <DialogFooter>
-          <Button onClick={onClose}>Done</Button>
+          <Button onClick={onClose}>{t('done')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

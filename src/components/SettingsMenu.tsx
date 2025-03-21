@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Settings, 
@@ -32,12 +33,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const SettingsMenu = () => {
   const { toast } = useToast();
-  const { language: currentLanguage, setLanguage: setContextLanguage } = useLanguage();
+  const { language: currentLanguage, setLanguage: setContextLanguage, t } = useLanguage();
   
   // Local state for settings (to be applied only when saved)
   const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
@@ -62,6 +63,11 @@ const SettingsMenu = () => {
     setIsLargeText(document.documentElement.classList.contains("large-text"));
     setIsReduceMotion(document.documentElement.classList.contains("reduce-motion"));
   }, []);
+
+  // Update language when currentLanguage changes
+  useEffect(() => {
+    setLanguage(currentLanguage);
+  }, [currentLanguage]);
   
   // Reset local settings to current applied settings
   const resetLocalSettings = () => {
@@ -119,14 +125,14 @@ const SettingsMenu = () => {
     if (language !== currentLanguage) {
       setContextLanguage(language);
       toast({
-        title: "Language Changed",
-        description: `Language set to ${language === 'en' ? 'English' : language === 'sn' ? 'Shona' : 'Ndebele'}`,
+        title: t('language_changed'),
+        description: `${t('language_set_to')} ${language === 'en' ? t('english') : language === 'sn' ? t('shona') : t('ndebele')}`,
       });
     }
     
     toast({
-      title: "Settings Saved",
-      description: "Your preferences have been updated",
+      title: t('settings'),
+      description: t('customize_experience'),
     });
   };
 
@@ -157,14 +163,14 @@ const SettingsMenu = () => {
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="rounded-full">
           <Settings className="h-5 w-5" />
-          <span className="sr-only">Settings</span>
+          <span className="sr-only">{t('settings')}</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="apple-card w-[340px] sm:w-[400px] py-10">
         <SheetHeader className="mb-5">
-          <SheetTitle className="text-2xl sf-pro-text">Settings</SheetTitle>
+          <SheetTitle className="text-2xl sf-pro-text">{t('settings')}</SheetTitle>
           <SheetDescription>
-            Customize your experience
+            {t('customize_experience')}
           </SheetDescription>
         </SheetHeader>
         
@@ -172,17 +178,17 @@ const SettingsMenu = () => {
           <TabsList className="grid grid-cols-2 mb-6">
             <TabsTrigger value="appearance">
               <Palette className="h-4 w-4 mr-2" />
-              <span>Appearance</span>
+              <span>{t('appearance')}</span>
             </TabsTrigger>
             <TabsTrigger value="accessibility">
               <Languages className="h-4 w-4 mr-2" />
-              <span>Language & Accessibility</span>
+              <span>{t('language')} & {t('accessibility')}</span>
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="appearance" className="space-y-4">
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Theme</h3>
+              <h3 className="text-lg font-medium">{t('theme')}</h3>
               <div className="flex flex-col space-y-2">
                 <Button
                   variant={theme === "light" ? "default" : "outline"}
@@ -190,7 +196,7 @@ const SettingsMenu = () => {
                   onClick={() => setTheme("light")}
                 >
                   <Sun className="mr-2 h-4 w-4" />
-                  Light
+                  {t('light_mode')}
                 </Button>
                 <Button
                   variant={theme === "dark" ? "default" : "outline"}
@@ -198,7 +204,7 @@ const SettingsMenu = () => {
                   onClick={() => setTheme("dark")}
                 >
                   <Moon className="mr-2 h-4 w-4" />
-                  Dark
+                  {t('dark_mode')}
                 </Button>
                 <Button
                   variant={theme === "system" ? "default" : "outline"}
@@ -210,7 +216,7 @@ const SettingsMenu = () => {
                     <path d="M12 1v2M12 21v2M1 12h2M21 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" 
                       stroke="currentColor" strokeWidth="2" />
                   </svg>
-                  System
+                  {t('system')}
                 </Button>
               </div>
             </div>
@@ -218,27 +224,27 @@ const SettingsMenu = () => {
           
           <TabsContent value="accessibility" className="space-y-4">
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Language & Region</h3>
+              <h3 className="text-lg font-medium">{t('language_and_region')}</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="language-select">Language</Label>
+                  <Label htmlFor="language-select">{t('language')}</Label>
                   <Select value={language} onValueChange={handleLanguageChange}>
                     <SelectTrigger id="language-select">
-                      <SelectValue placeholder="Select language" />
+                      <SelectValue placeholder={`${t('language')}`} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="sn">Shona</SelectItem>
-                      <SelectItem value="nd">Ndebele</SelectItem>
+                      <SelectItem value="en">{t('english')}</SelectItem>
+                      <SelectItem value="sn">{t('shona')}</SelectItem>
+                      <SelectItem value="nd">{t('ndebele')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="region-select">Region</Label>
+                  <Label htmlFor="region-select">{t('region')}</Label>
                   <Select value={region} onValueChange={handleRegionChange}>
                     <SelectTrigger id="region-select">
-                      <SelectValue placeholder="Select region" />
+                      <SelectValue placeholder={`${t('region')}`} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="zw">Zimbabwe</SelectItem>
@@ -251,11 +257,11 @@ const SettingsMenu = () => {
                 </div>
               </div>
               
-              <h3 className="text-lg font-medium mt-6">Accessibility</h3>
+              <h3 className="text-lg font-medium mt-6">{t('accessibility')}</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="high-contrast" className="text-base">High Contrast</Label>
+                    <Label htmlFor="high-contrast" className="text-base">{t('high_contrast')}</Label>
                     <span className="text-xs text-muted-foreground">Increase contrast for better readability</span>
                   </div>
                   <Switch 
@@ -269,7 +275,7 @@ const SettingsMenu = () => {
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="large-text" className="text-base">
                       <Type className="h-4 w-4 inline mr-2" />
-                      Larger Text
+                      {t('large_text')}
                     </Label>
                     <span className="text-xs text-muted-foreground">Increase text size</span>
                   </div>
@@ -282,7 +288,7 @@ const SettingsMenu = () => {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="reduce-motion" className="text-base">Reduce Motion</Label>
+                    <Label htmlFor="reduce-motion" className="text-base">{t('reduce_motion')}</Label>
                     <span className="text-xs text-muted-foreground">Minimize animation effects</span>
                   </div>
                   <Switch 
@@ -304,7 +310,7 @@ const SettingsMenu = () => {
               onClick={() => handleCancel(() => {})}
             >
               <X className="mr-2 h-4 w-4" />
-              Cancel
+              {t('cancel')}
             </Button>
           </SheetClose>
           
@@ -316,7 +322,7 @@ const SettingsMenu = () => {
               }}
             >
               <Check className="mr-2 h-4 w-4" />
-              Save
+              {t('save_changes')}
             </Button>
           </SheetClose>
         </SheetFooter>

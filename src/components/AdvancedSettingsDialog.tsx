@@ -28,7 +28,7 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
   onClose
 }) => {
   const { toast } = useToast();
-  const { language: currentLanguage, setLanguage } = useLanguage();
+  const { language: currentLanguage, setLanguage, t } = useLanguage();
   
   const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
   const [highContrast, setHighContrast] = useState(false);
@@ -94,25 +94,25 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
     }
 
     toast({
-      title: "Settings Saved",
-      description: "Your preferences have been updated",
+      title: t('settings'),
+      description: t('customize_experience'),
     });
     
     onClose();
   };
   
   const languageOptions: SettingOption[] = [
-    { id: "en", name: "English", icon: <Globe className="h-5 w-5" /> },
-    { id: "sn", name: "Shona", icon: <Globe className="h-5 w-5" /> },
-    { id: "nd", name: "Ndebele", icon: <Globe className="h-5 w-5" /> },
+    { id: "en", name: t('english'), icon: <Globe className="h-5 w-5" /> },
+    { id: "sn", name: t('shona'), icon: <Globe className="h-5 w-5" /> },
+    { id: "nd", name: t('ndebele'), icon: <Globe className="h-5 w-5" /> },
   ];
   
   const handleLanguageChange = (languageId: string) => {
     if (languageId === "en" || languageId === "sn" || languageId === "nd") {
       setLanguage(languageId);
       toast({
-        title: "Language Changed",
-        description: `Language set to ${languageId === 'en' ? 'English' : languageId === 'sn' ? 'Shona' : 'Ndebele'}`,
+        title: t('language_changed'),
+        description: `${t('language_set_to')} ${languageId === 'en' ? t('english') : languageId === 'sn' ? t('shona') : t('ndebele')}`,
       });
     }
   };
@@ -122,19 +122,19 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
       <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
         <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden">
           <DialogHeader className="px-4 py-3 border-b">
-            <DialogTitle className="text-lg">Settings</DialogTitle>
+            <DialogTitle className="text-lg">{t('settings')}</DialogTitle>
           </DialogHeader>
           
           <Tabs defaultValue="general" className="w-full">
             <TabsList className="grid grid-cols-3 w-full rounded-none border-b h-12">
               <TabsTrigger value="general" className="rounded-none">General</TabsTrigger>
-              <TabsTrigger value="language" className="rounded-none">Language</TabsTrigger>
-              <TabsTrigger value="accessibility" className="rounded-none">Accessibility</TabsTrigger>
+              <TabsTrigger value="language" className="rounded-none">{t('language')}</TabsTrigger>
+              <TabsTrigger value="accessibility" className="rounded-none">{t('accessibility')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="general" className="p-4 space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Appearance</h3>
+                <h3 className="text-lg font-medium">{t('appearance')}</h3>
                 <RadioGroup 
                   value={theme} 
                   onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}
@@ -144,7 +144,7 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="light" id="light" />
                       <Label htmlFor="light" className="flex items-center gap-2">
-                        <Sun className="h-4 w-4" /> Light
+                        <Sun className="h-4 w-4" /> {t('light_mode')}
                       </Label>
                     </div>
                   </div>
@@ -153,7 +153,7 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="dark" id="dark" />
                       <Label htmlFor="dark" className="flex items-center gap-2">
-                        <Moon className="h-4 w-4" /> Dark
+                        <Moon className="h-4 w-4" /> {t('dark_mode')}
                       </Label>
                     </div>
                   </div>
@@ -166,7 +166,7 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
                           <circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
                           <path d="M12 1v2M12 21v2M1 12h2M21 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" 
                             stroke="currentColor" strokeWidth="2" />
-                        </svg> System
+                        </svg> {t('system')}
                       </Label>
                     </div>
                   </div>
@@ -233,7 +233,7 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
             
             <TabsContent value="language" className="p-0">
               <div className="p-4 border-b">
-                <h3 className="text-sm font-medium text-muted-foreground">SELECT LANGUAGE</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">SELECT {t('language').toUpperCase()}</h3>
               </div>
               
               <div className="divide-y">
@@ -261,7 +261,7 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
                   <div>
                     <Label htmlFor="high-contrast" className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
-                      <span>High Contrast</span>
+                      <span>{t('high_contrast')}</span>
                     </Label>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Increases contrast for better readability
@@ -278,7 +278,7 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
                   <div>
                     <Label htmlFor="large-text" className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
-                      <span>Larger Text</span>
+                      <span>{t('large_text')}</span>
                     </Label>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Increases text size throughout the app
@@ -295,7 +295,7 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
                   <div>
                     <Label htmlFor="reduce-motion" className="flex items-center gap-2">
                       <Accessibility className="h-4 w-4" />
-                      <span>Reduce Motion</span>
+                      <span>{t('reduce_motion')}</span>
                     </Label>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Minimizes animation effects
@@ -330,10 +330,10 @@ const AdvancedSettingsDialog: React.FC<SettingsDialogProps> = ({
           
           <div className="flex items-center justify-end gap-2 p-4 border-t">
             <Button variant="outline" onClick={onClose} className="gap-1">
-              <X className="h-4 w-4" /> Cancel
+              <X className="h-4 w-4" /> {t('cancel')}
             </Button>
             <Button onClick={applySettings} className="gap-1">
-              <Check className="h-4 w-4" /> Save
+              <Check className="h-4 w-4" /> {t('save_changes')}
             </Button>
           </div>
         </DialogContent>

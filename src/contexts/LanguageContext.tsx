@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 type Language = 'en' | 'sn' | 'nd';
 
@@ -63,7 +63,25 @@ const translations: Record<Language, Record<string, string>> = {
     'all_contacts': 'All Contacts',
     'default': 'Default',
     'calling': 'Calling',
-    'dialing': 'Dialing'
+    'dialing': 'Dialing',
+
+    // Settings
+    'settings': 'Settings',
+    'customize_experience': 'Customize your experience',
+    'appearance': 'Appearance',
+    'language': 'Language',
+    'accessibility': 'Accessibility',
+    'theme': 'Theme',
+    'dark_mode': 'Dark Mode',
+    'light_mode': 'Light Mode',
+    'system': 'System',
+    'high_contrast': 'High Contrast',
+    'large_text': 'Large Text',
+    'reduce_motion': 'Reduce Motion',
+    'done': 'Done',
+    'language_and_region': 'Language & Region',
+    'region': 'Region',
+    'display_language': 'Display Language'
   },
   
   sn: {
@@ -116,7 +134,25 @@ const translations: Record<Language, Record<string, string>> = {
     'all_contacts': 'Vanhu Vose',
     'default': 'Anokosha',
     'calling': 'Kudana',
-    'dialing': 'Kudaira'
+    'dialing': 'Kudaira',
+
+    // Settings
+    'settings': 'Zvirimodeterwa',
+    'customize_experience': 'Ita kuti zviite nenzira yako',
+    'appearance': 'Kuonekwa',
+    'language': 'Mutauro',
+    'accessibility': 'Kuwanisa',
+    'theme': 'Muvari',
+    'dark_mode': 'Muvari Wesviba',
+    'light_mode': 'Muvari Wechena',
+    'system': 'Mashini',
+    'high_contrast': 'Kuoneka Kwakasimba',
+    'large_text': 'Manyorero Makuru',
+    'reduce_motion': 'Deredza Kutenderera',
+    'done': 'Zvaita',
+    'language_and_region': 'Mutauro neNharaunda',
+    'region': 'Nharaunda',
+    'display_language': 'Mutauro Wekuratidza'
   },
   
   nd: {
@@ -169,12 +205,39 @@ const translations: Record<Language, Record<string, string>> = {
     'all_contacts': 'Bonke Abantu',
     'default': 'Okubalulekile',
     'calling': 'Uyafona',
-    'dialing': 'Uyakhipa'
+    'dialing': 'Uyakhipa',
+
+    // Settings
+    'settings': 'Izilungiselelo',
+    'customize_experience': 'Customiza isipiliyoni sakho',
+    'appearance': 'Ukubukeka',
+    'language': 'Ulimi',
+    'accessibility': 'Ukufinyelela',
+    'theme': 'Indlela yokubukeka',
+    'dark_mode': 'Indlela emnyama',
+    'light_mode': 'Indlela ekhanyayo',
+    'system': 'Isistimu',
+    'high_contrast': 'Okubonakala kakhulu',
+    'large_text': 'Umbhalo omkhulu',
+    'reduce_motion': 'Nciphisa ukuhamba',
+    'done': 'Kwenziwe',
+    'language_and_region': 'Ulimi nesiFunda',
+    'region': 'IsiFunda',
+    'display_language': 'Ulimi lokubonisa'
   }
 };
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  // Initialize language from localStorage or default to 'en'
+  const [language, setLanguage] = useState<Language>(() => {
+    const savedLanguage = localStorage.getItem('language');
+    return (savedLanguage as Language) || 'en';
+  });
+  
+  // Save language to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
   
   // Translation function
   const t = (key: string): string => {
